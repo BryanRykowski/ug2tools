@@ -1,0 +1,14 @@
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+.vscode/
+CMakeFiles/
+
+CMakeCache.txt
+cmake_install.cmake
+*.exe
+*.lib
+*.o
+*.a
+*.so
+Makefile
