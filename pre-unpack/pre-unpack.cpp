@@ -82,6 +82,7 @@ int main(int argc, char **argv)
         std::cout << std::endl;
     }
 
+    // Loop though the subfiles.
     for (unsigned int i = 0; i < header.numFiles; ++i)
     {
         SubFileHeader subheader;
@@ -103,7 +104,7 @@ int main(int argc, char **argv)
 
         if (globalValues.unpack)
         {
-            if (ExtractSubFile(instream, subheader))
+            if (ExtractSubFile(instream, subheader)) // Inflate the file.
             {
                 std::cerr << "Unpacking failed." << std::endl;
                 return -1;
@@ -111,7 +112,7 @@ int main(int argc, char **argv)
         }
         else
         {
-            if (SkipSubFile(instream, subheader))
+            if (SkipSubFile(instream, subheader)) // Or just jump to the next header if -n flag is set.
             {
                 std::cerr << "Unpacking failed." << std::endl;
                 return -1;
@@ -210,6 +211,7 @@ bool ReadHeader(std::ifstream &infile, PreHeader &outheader)
         return true;
     }
 
+    // This might seem like overkill but I want this to work on big endian platforms just in case.
     outheader.size = static_cast<unsigned char>(bytes[0]);
     outheader.size |= static_cast<unsigned char>(bytes[1]) << 8;
     outheader.size |= static_cast<unsigned char>(bytes[2]) << 16;
@@ -264,6 +266,10 @@ bool ReadSubFileHeader(std::ifstream &infile, SubFileHeader &outsubheader)
     outsubheader.path.resize(outsubheader.pathSize);
     infile.read(reinterpret_cast<std::ifstream::char_type*>(&outsubheader.path.front()), outsubheader.pathSize);
 
+    // Just like every other section of a pre/prx file, the subfile headers are 4 byte aligned.
+    // However, the subfile path length includes the padding at the end, so we don't have to manually skip any
+    // bytes.
+
     if (infile.gcount() != outsubheader.pathSize)
     {
         return true;
@@ -294,6 +300,9 @@ bool SkipSubFile(std::ifstream &infile, const SubFileHeader &subheader)
         skipCount += padding;
     }
 
+    // Every segment of a pre/prx file is aligned to a 4 byte boundary.
+    // This means we need to skip between 1 and 3 bytes to get to the next subfile's header.
+
     for (unsigned int i = 0; i < skipCount; ++i)
     {
         if (!infile.good())
@@ -320,6 +329,7 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
     unsigned int readCount;
     unsigned int padding;
 
+    // Get the file name from the end of the internal path.
     for (char c : subheader.path)
     {
         if (c == '\\') {slash_loc = path_pos;}
@@ -329,6 +339,7 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
     outpath = std::string(subheader.path.begin(), subheader.path.end());
     outpath = globalValues.outDir + outpath.substr(slash_loc + 1, outpath.size() - 1);
 
+    // Check if the file already exists and fail if necessary.
     if (!globalValues.overwrite && std::filesystem::exists(outpath))
     {
         std::cout << "Error: file \"" << outpath << "\" already exists and overwrite not enabled" << std::endl;
@@ -337,6 +348,8 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
 
     outfile.open(outpath, outfile.binary);
 
+    // Check if the subfile is compressed. Uncompressed files have a deflated
+    // size of 0.
     if (subheader.deflatedSize == 0)
     {
         char c;
@@ -357,6 +370,34 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
     }
     else
     {
+        // pre/prx files use LZSS compression. Data is stored in groups starting with a type byte.
+        // Each 1 bit indicates a regular byte, while each 0 indicates a 2 byte offset/length pair.
+        // This means that each segment will be between 9 and 17 bytes.
+        //
+        //     Example:
+        //     
+        //     D - regular byte
+        //     L - offset/length low byte
+        //     H - offset/length high byte
+        //     
+        //     [01110111][D][D][D][L][H][D][D][D][L][H]
+        //
+        // The last segment will likely be shorter than 8 pieces. The deflatedSize in the header
+        // should be used to decide when to stop.
+        //
+        // The offset/length pairs contain a 12 bit offset and 4 bit length indicating a start point
+        // and run length to be read from the ring buffer. The offset is made from combining the low
+        // byte with the 4 high bits of the high byte:
+        //
+        //      o/l high  o/l low       offset
+        //     [hhhhxxxx][llllllll] -> [hhhhllllllll]
+        //
+        // The 4 low bits of the high byte are the number of bytes to read from the buffer. The actual
+        // length to read is the value of those bits + 3, meaning anywhere from 3 to 18.
+        //
+        // The buffer is a 4KiB ring buffer that starts being written to at offset 0xFEE (4078). Every
+        // byte written to the output file is also written to the buffer.
+
         readCount = subheader.deflatedSize;
         buffer.reserve(4096);
 
@@ -365,6 +406,7 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
             char c;
             unsigned char type_byte;
 
+            // Read the type byte of the next segment.
             if (!infile.get(c))
             {
                 std::cout << "Error: Failed to inflate subfile" << std::endl;
@@ -374,10 +416,14 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
 
             type_byte = static_cast<unsigned char>(c);
 
+            // Loop through the 8 pieces of the segment. Each of these is either a regular byte or an
+            // offset/length pair.
             for (int i = 0; i < 8; ++i)
             {
-                if ((type_byte >> i) & 0x1)
+                if ((type_byte >> i) & 0x1) // If this piece is a regular byte, just write it to the buffer and output file.
                 {
+                    
+                    // Check if we've hit the end of the compressed file data.
                     if (subfile_pos >= readCount)
                     {
                         break;
@@ -391,16 +437,17 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
                     ++subfile_pos;
 
                     buffer[buffer_pos] = c;
-                    buffer_pos = (buffer_pos + 1) % 4096;
+                    buffer_pos = (buffer_pos + 1) % 4096; // Use mod 4096 to make sure we wrap around.
 
                     outfile.put(c);
                 }
-                else
+                else // Otherwise, read the offset and length pair.
                 {
                     unsigned char b0, b1;
                     unsigned int offset;
                     unsigned int count;
                     
+                    // Check if we've hit the end of the compressed file data. 
                     if (subfile_pos >= readCount)
                     {
                         break;
@@ -424,15 +471,18 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
 
                     b1 = static_cast<unsigned char>(c);
 
+                    // Unpack the offset and length from the pair.
                     offset = b0;
                     offset |= static_cast<unsigned int>(b1 & 0xf0) << 4;
 
                     count = (b1 & 0x0f) + 3;
 
+                    // Read [count] bytes from the buffer starting at [offset], writing them to the
+                    // end of the buffer and the output file.
                     for (unsigned int j = 0; j < count; ++j)
                     {
                         buffer[buffer_pos] = buffer[offset];
-                        buffer_pos = (buffer_pos + 1) % 4096;
+                        buffer_pos = (buffer_pos + 1) % 4096; // Use mod 4096 to make sure we wrap around.
 
                         outfile.put(buffer[offset]);
                         offset = (offset + 1) % 4096;
@@ -442,6 +492,9 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
         }
     }
 
+    // Every section of a pre/prx file is aligned to 4 byte boundaries. If the subfile is not a multiple of 4
+    // bytes long we need to skip between 1 and 3 bytes to get to the next subfile's header.
+    
     padding = readCount % 4;
 
     if (padding)
