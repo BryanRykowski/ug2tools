@@ -262,7 +262,6 @@ bool ReadSubFileHeader(std::ifstream &infile, SubFileHeader &outsubheader)
     outsubheader.pathCRC |= static_cast<unsigned char>(bytes[14]) << 16;
     outsubheader.pathCRC |= static_cast<unsigned char>(bytes[15]) << 24;
 
-    outsubheader.path.reserve(outsubheader.pathSize);
     outsubheader.path.resize(outsubheader.pathSize);
     infile.read(reinterpret_cast<std::ifstream::char_type*>(&outsubheader.path.front()), outsubheader.pathSize);
 
@@ -399,7 +398,7 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
         // byte written to the output file is also written to the buffer.
 
         readCount = subheader.deflatedSize;
-        buffer.reserve(4096);
+        buffer.resize(4096);
 
         while (subfile_pos < readCount)
         {
