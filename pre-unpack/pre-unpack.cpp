@@ -12,8 +12,8 @@ struct
     bool unpack = true;
     bool quiet = false;
     bool overwrite = false;
-    std::string inpath = "";
-    std::string outDir = "";
+    std::filesystem::path inpath;
+    std::filesystem::path outDir;
 } globalValues;
 
 void PrintHelp();
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    if (globalValues.inpath == "")
+    if (globalValues.inpath.empty())
     {
         std::cerr << "Error: No input file" << std::endl;
         std::cerr << "Unpacking failed." << std::endl;
@@ -183,11 +183,6 @@ bool ReadArgs(int argc, char **argv)
                     
                     i++;
                     globalValues.outDir = argv[i];
-
-                    if (globalValues.outDir.back() != '/')
-                    {
-                        globalValues.outDir.push_back('/');
-                    }
                 }
             }
         }
@@ -319,24 +314,32 @@ bool SkipSubFile(std::ifstream &infile, const SubFileHeader &subheader)
 bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
 {
     std::ofstream outfile;
-    std::string outpath;
+    std::filesystem::path outpath;
+    std::string filename;
     std::vector<char> buffer;
     unsigned int buffer_pos = 0xfee;
     unsigned int subfile_pos = 0;
-    unsigned int path_pos = 0;
-    unsigned int slash_loc;
+    unsigned int slash_loc = 0;
+    unsigned int null_loc = 0;
     unsigned int readCount;
     unsigned int padding;
-
-    // Get the file name from the end of the internal path.
-    for (char c : subheader.path)
+    
+    for (unsigned int i = 0; i < subheader.path.size(); ++i)
     {
-        if (c == '\\') {slash_loc = path_pos;}
-        ++path_pos;
+        if (subheader.path[i] == '\\') {slash_loc = i;}
     }
 
-    outpath = std::string(subheader.path.begin(), subheader.path.end());
-    outpath = globalValues.outDir + outpath.substr(slash_loc + 1, outpath.size() - 1);
+    for (int i = subheader.path.size() - 1; i >=0; --i)
+    {
+        if (subheader.path[i] == 0) {null_loc = i;}
+    }
+
+    for (unsigned int i = slash_loc + 1; i < null_loc; ++i)
+    {
+        filename.push_back(subheader.path[i]);
+    }
+
+    outpath = globalValues.outDir / filename; 
 
     // Check if the file already exists and fail if necessary.
     if (!globalValues.overwrite && std::filesystem::exists(outpath))
