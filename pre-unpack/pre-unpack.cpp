@@ -194,7 +194,9 @@ void PrintHelp()
     std::cout << "    -h              Print this help text" << std::endl;
     std::cout << "    -o DIRECTORY    Place files in DIRECTORY instead of current directory" << std::endl;
     std::cout << "    -q              Suppress some output. Does not include errors" << std::endl;
-    std::cout << "    -w              Overwrite existing files" << std::endl;  
+    std::cout << "    -w              Overwrite existing files" << std::endl;
+    std::cout << "    -p              Disable prespec file generation." << std::endl;
+    std::cout << "    -P              Disable absolute paths in prespec file." << std::endl;
 }
 
 bool ReadArgs(int argc, char **argv)
