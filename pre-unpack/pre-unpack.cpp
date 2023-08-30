@@ -12,6 +12,7 @@ struct
     bool unpack = true;
     bool quiet = false;
     bool overwrite = false;
+    bool prespec = true;
     std::filesystem::path inpath;
     std::filesystem::path outDir;
 } globalValues;
@@ -27,6 +28,7 @@ int main(int argc, char **argv)
 {
     PreHeader header;
     std::ifstream instream;
+    std::ofstream prespecstream;
 
     if (!(argc > 1))
     {
@@ -62,6 +64,28 @@ int main(int argc, char **argv)
         std::cerr << "Error: Failed to open input file" << std::endl;
         std::cerr << "Unpacking failed." << std::endl;
         return -1;
+    }
+
+    if (globalValues.prespec)
+    {
+        std::filesystem::path prespecpath = globalValues.outDir / globalValues.inpath.filename();
+        prespecpath.replace_extension("prespec");
+
+        if (!globalValues.overwrite && std::filesystem::exists(prespecpath))
+        {
+            std::cerr << "Error: file \"" << prespecpath << "\" already exists and overwrite not enabled" << std::endl;
+            std::cerr << "Unpacking failed." << std::endl;
+            return -1;
+        }
+
+        prespecstream.open(prespecpath);
+
+        if (!prespecstream.good())
+        {
+            std::cerr << "Error: Failed to create prespec file" << std::endl;
+            std::cerr << "Unpacking failed." << std::endl;
+            return -1;
+        }
     }
 
     if (ReadHeader(instream, header))
@@ -117,6 +141,31 @@ int main(int argc, char **argv)
                 std::cerr << "Unpacking failed." << std::endl;
                 return -1;
             }
+        }
+
+        if (globalValues.prespec)
+        {
+            unsigned int slash_loc = 0;
+            unsigned int null_loc = 0;
+            std::string filename;
+
+            for (unsigned int i = 0; i < subheader.path.size(); ++i)
+            {
+                if (subheader.path[i] == '\\') {slash_loc = i;}
+            }
+
+            for (int i = subheader.path.size() - 1; i >=0; --i)
+            {
+                if (subheader.path[i] == 0) {null_loc = i;}
+            }
+
+            for (unsigned int i = slash_loc + 1; i < null_loc; ++i)
+            {
+                filename.push_back(subheader.path[i]);
+            }
+
+            prespecstream << filename << std::endl;
+            prespecstream << std::string(subheader.path.begin(), subheader.path.begin() + std::vector<char>::difference_type(null_loc)) << std::endl << std::endl;
         }
     }
 
