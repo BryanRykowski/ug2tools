@@ -13,6 +13,7 @@ struct
     bool quiet = false;
     bool overwrite = false;
     bool prespec = true;
+    bool prespecfullpath = true;
     std::filesystem::path inpath;
     std::filesystem::path outDir;
 } globalValues;
@@ -145,13 +146,12 @@ int main(int argc, char **argv)
 
         if (globalValues.prespec)
         {
-            unsigned int slash_loc = 0;
-            unsigned int null_loc = 0;
-            std::string filename;
+            std::vector<char>::difference_type slash_loc = 0;
+            std::vector<char>::difference_type null_loc = 0;
 
             for (unsigned int i = 0; i < subheader.path.size(); ++i)
             {
-                if (subheader.path[i] == '\\') {slash_loc = i;}
+                if (subheader.path[i] == '\\') {slash_loc = i + 1;}
             }
 
             for (int i = subheader.path.size() - 1; i >=0; --i)
@@ -159,13 +159,18 @@ int main(int argc, char **argv)
                 if (subheader.path[i] == 0) {null_loc = i;}
             }
 
-            for (unsigned int i = slash_loc + 1; i < null_loc; ++i)
+            std::filesystem::path filepath;
+            
+            if (globalValues.prespecfullpath)
             {
-                filename.push_back(subheader.path[i]);
+                filepath = std::filesystem::current_path();
+                filepath /= globalValues.outDir;
             }
 
-            prespecstream << filename << std::endl;
-            prespecstream << std::string(subheader.path.begin(), subheader.path.begin() + std::vector<char>::difference_type(null_loc)) << std::endl << std::endl;
+            filepath /= std::string(subheader.path.begin() + slash_loc, subheader.path.begin() + null_loc);
+
+            prespecstream << filepath.string() << std::endl;
+            prespecstream << std::string(subheader.path.begin(), subheader.path.begin() + null_loc) << std::endl << std::endl;
         }
     }
 
@@ -226,7 +231,10 @@ bool ReadArgs(int argc, char **argv)
                 {
                     globalValues.prespec = false;
                 }
-                
+                else if (c == 'P')
+                {
+                    globalValues.prespecfullpath = false;
+                }
                 else if (c == 'o')
                 {
                     if ((i + 1) >= argc)
