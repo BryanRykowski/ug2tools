@@ -222,6 +222,11 @@ bool ReadArgs(int argc, char **argv)
                 {
                     globalValues.printhelp = true;
                 }
+                else if (c == 'p')
+                {
+                    globalValues.prespec = false;
+                }
+                
                 else if (c == 'o')
                 {
                     if ((i + 1) >= argc)
