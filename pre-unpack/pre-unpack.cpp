@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 
         prespecstream.open(prespecpath);
 
-        if (!prespecstream.good())
+        if (prespecstream.fail()) // Check fail() instead of good(). Seems like eof causes good() to return false when opening a new file on mingw-g++.
         {
             std::cerr << "Error: Failed to create prespec file" << std::endl;
             std::cerr << "Unpacking failed." << std::endl;
