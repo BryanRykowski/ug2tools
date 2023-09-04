@@ -50,6 +50,7 @@ int main(int argc, char **argv)
     PreHeader header;
     std::ifstream instream;
     std::ofstream prespecstream;
+    std::filesystem::path workingdir;
 
     if (!(argc > 1))
     {
@@ -107,6 +108,8 @@ int main(int argc, char **argv)
             std::cerr << "Unpacking failed." << std::endl;
             return -1;
         }
+
+        workingdir = std::filesystem::current_path();
     }
 
     if (ReadHeader(instream, header))
@@ -183,7 +186,7 @@ int main(int argc, char **argv)
             
             if (globalValues.prespecfullpath)
             {
-                filepath = std::filesystem::current_path();
+                filepath = workingdir;
                 filepath /= globalValues.outDir;
             }
 
