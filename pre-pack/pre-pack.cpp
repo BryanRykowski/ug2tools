@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 typedef std::pair<std::filesystem::path,std::string> FilePair;
 
@@ -32,6 +33,7 @@ struct
 } globalValues;
 
 bool ReadArgs(int argc, char **argv);
+bool ReadPrespec();
 
 int main(int argc, char **argv)
 {
@@ -46,6 +48,15 @@ int main(int argc, char **argv)
     {
         std::cerr << "Packing failed." << std::endl;
         return -1;
+    }
+
+    if (!globalValues.prespecpath.empty())
+    {
+        if (ReadPrespec())
+        {
+            std::cerr << "Packing failed." << std::endl;
+            return -1;
+        }
     }
 
     return 0;
@@ -82,6 +93,19 @@ bool ReadArgs(int argc, char **argv)
         {
             globalValues.prespecpath = arg;
         }
+    }
+
+    return false;
+}
+
+bool ReadPrespec()
+{
+    std::ifstream psstream(globalValues.prespecpath);
+
+    if (!psstream.good())
+    {
+        std::cerr << "Error: Failed to open prespec file \"" << globalValues.prespecpath.string() << "\"" << std::endl;
+        return true;
     }
 
     return false;
