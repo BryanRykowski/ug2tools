@@ -34,6 +34,7 @@ struct
 
 bool ReadArgs(int argc, char **argv);
 bool ReadPrespec();
+bool ReadLine(std::ifstream &instream, std::string &outstr);
 
 int main(int argc, char **argv)
 {
@@ -57,6 +58,11 @@ int main(int argc, char **argv)
             std::cerr << "Packing failed." << std::endl;
             return -1;
         }
+    }
+
+    for (FilePair fp : globalValues.filelist)
+    {
+        std::cout << fp.first.string() << std::endl << fp.second << std::endl << std::endl;
     }
 
     return 0;
@@ -106,6 +112,65 @@ bool ReadPrespec()
     {
         std::cerr << "Error: Failed to open prespec file \"" << globalValues.prespecpath.string() << "\"" << std::endl;
         return true;
+    }
+
+    std::string line;
+
+    while (psstream.good() && !psstream.eof())
+    {
+        if (ReadLine(psstream, line))
+        {
+            std::cerr << "Error: Failed to read prespec file" << std::endl;
+            return true;
+        }
+
+        std::filesystem::path filepath = line;
+
+        if (psstream.eof())
+        {
+            std::cerr << "Error: Disk path/internal path mismatch in prespec file" << std::endl;
+            return true;
+        }
+
+        if (ReadLine(psstream, line))
+        {
+            std::cerr << "Error: Failed to read prespec file" << std::endl;
+            return true;
+        }
+
+        globalValues.filelist.push_back(FilePair(filepath, line));
+    }
+
+    return false;
+}
+
+bool ReadLine(std::ifstream &instream, std::string &outstr)
+{
+    bool line_ended = false;
+    outstr = "";
+
+    while (true)
+    {
+
+        if (instream.fail()) {return true;}
+
+        int p = instream.peek();
+
+        if (p == EOF)
+        {
+            break;
+        }
+        else if (static_cast<char>(p) == '\r' || static_cast<char>(p) == '\n')
+        {
+            line_ended = true;
+            instream.get();
+        }
+        else
+        {
+            if (line_ended) {break;}
+
+            outstr.push_back(instream.get());
+        }
     }
 
     return false;
