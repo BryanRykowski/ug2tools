@@ -23,6 +23,8 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include "../common/pre_header.hpp"
+#include "../common/subfile_header.hpp"
 
 typedef std::pair<std::filesystem::path,std::string> FilePair;
 
@@ -30,11 +32,13 @@ struct
 {
     std::filesystem::path prespecpath;
     std::vector<FilePair> filelist;
+    PreHeader header;
 } globalValues;
 
 bool ReadArgs(int argc, char **argv);
 bool ReadPrespec();
 bool ReadLine(std::ifstream &instream, std::string &outstr);
+bool WritePre();
 
 int main(int argc, char **argv)
 {
@@ -60,9 +64,17 @@ int main(int argc, char **argv)
         }
     }
 
-    for (FilePair fp : globalValues.filelist)
+    if (globalValues.filelist.size() == 0)
     {
-        std::cout << fp.first.string() << std::endl << fp.second << std::endl << std::endl;
+        std::cerr << "Error: No files to pack" << std::endl;
+        std::cerr << "Packing failed." << std::endl;
+        return -1;
+    }
+
+    if (WritePre())
+    {
+        std::cerr << "Packing failed." << std::endl;
+        return -1;
     }
 
     return 0;
@@ -173,5 +185,23 @@ bool ReadLine(std::ifstream &instream, std::string &outstr)
         }
     }
 
+    return false;
+}
+
+bool WritePre()
+{
+    unsigned int presize = 0;
+    unsigned int precount = 0;
+
+    for (FilePair fp : globalValues.filelist)
+    {
+        std::cout << "file: " << fp.first.string() << std::endl;
+        std::cout << "internal path: " << fp.second << std::endl << std::endl;
+
+        ++precount;
+    }
+
+    std::cout << "total files: " << precount << std::endl;
+    
     return false;
 }
