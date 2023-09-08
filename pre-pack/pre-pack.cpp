@@ -31,6 +31,7 @@ typedef std::pair<std::filesystem::path,std::string> FilePair;
 struct
 {
     std::filesystem::path prespecpath;
+    std::filesystem::path outpath = "out.pre";
     std::vector<FilePair> filelist;
     PreHeader header;
 } globalValues;
@@ -91,11 +92,20 @@ bool ReadArgs(int argc, char **argv)
         if ((arg[0] == '-') && (arg.size() > 1))
         {
             std::string switches = arg.substr(1, arg.size() - 1);
+            bool exclusive_sw = false;
 
             for (char c : switches)
             {
                 if (c == 'f')
                 {
+                    if (exclusive_sw)
+                    {
+                        std::cerr << "Error: Mutually exclusive switches combined" << std::endl;
+                        return true;
+                    }
+
+                    exclusive_sw = true;
+                    
                     if (i + 2 >= argc)
                     {
                         std::cerr << "Error: Wrong number of arguments after -f" << std::endl;
@@ -104,6 +114,25 @@ bool ReadArgs(int argc, char **argv)
 
                     globalValues.filelist.push_back(FilePair(std::filesystem::path(argv[i+1]),argv[i+2]));
                     i += 2;
+                }
+                else if (c == 'o')
+                {
+                    if (exclusive_sw)
+                    {
+                        std::cerr << "Error: Mutually exclusive switches combined" << std::endl;
+                        return true;
+                    }
+
+                    exclusive_sw = true;
+                    
+                    if (i + 1 >= argc)
+                    {
+                        std::cerr << "Error: Wrong number of arguments after -o" << std::endl;
+                        return true;
+                    }
+
+                    ++i;
+                    globalValues.outpath = argv[i];
                 }
             }
         }
@@ -193,6 +222,7 @@ bool WritePre()
     unsigned int presize = 0;
     unsigned int precount = 0;
 
+
     for (FilePair fp : globalValues.filelist)
     {
         std::cout << "file: " << fp.first.string() << std::endl;
@@ -201,7 +231,9 @@ bool WritePre()
         ++precount;
     }
 
+    std::cout << globalValues.outpath.string() << std::endl << std::endl;
     std::cout << "total files: " << precount << std::endl;
+    std::cout << "total size: " << presize << std::endl;
     
     return false;
 }
