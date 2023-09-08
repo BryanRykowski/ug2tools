@@ -39,7 +39,6 @@ struct
     std::filesystem::path prespecpath;
     std::filesystem::path outpath = "out.pre";
     std::vector<FilePair> filelist;
-    PreHeader header;
 } globalValues;
 
 bool ReadArgs(int argc, char **argv);
@@ -230,6 +229,8 @@ bool WritePre()
     unsigned int precount = 0;
     std::ofstream outstream;
     std::vector<char> buffer;
+    PreHeader header;
+    const unsigned int chunksize = 1024 * 1024;
 
     outstream.open(globalValues.outpath, outstream.binary);
 
@@ -239,7 +240,7 @@ bool WritePre()
         return true;
     }
 
-    buffer.reserve(1024 * 1024);
+    buffer.reserve(chunksize);
 
     if (WritePreHeader(outstream, PreHeader(), presize))
     {
@@ -284,7 +285,12 @@ bool WritePre()
         
         while (!instream.eof())
         {
-            instream.read(buffer.data() + subheader.inflatedSize, 1024 * 1024);
+            if (subheader.inflatedSize == buffer.capacity())
+            {
+                buffer.reserve(buffer.capacity() + chunksize);
+            }
+
+            instream.read(buffer.data() + subheader.inflatedSize, chunksize);
             subheader.inflatedSize += instream.gcount();
         }
 
