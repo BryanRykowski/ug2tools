@@ -26,7 +26,13 @@
 #include "../common/pre_header.hpp"
 #include "../common/subfile_header.hpp"
 
-typedef std::pair<std::filesystem::path,std::string> FilePair;
+struct FilePair
+{
+    std::filesystem::path path;
+    std::string internal_path;
+
+    FilePair(std::filesystem::path pathin, std::string internal_pathin) : path(pathin), internal_path(internal_pathin) {} 
+};
 
 struct
 {
@@ -225,15 +231,24 @@ bool WritePre()
     for (FilePair fp : globalValues.filelist)
     {
         SubFileHeader subheader;
-        unsigned int diff;
+        unsigned int pad;
         
-        std::cout << "file: " << fp.first.string() << std::endl;
-        std::cout << "internal path: " << fp.second << std::endl << std::endl;
+        std::cout << "file: " << fp.path.string() << std::endl;
+        std::cout << "internal path: " << fp.internal_path << std::endl << std::endl;
 
-        for (char c : fp.second)
+        pad = (fp.internal_path.size() % 4) ? (4 - (fp.internal_path.size() % 4)) : 0;
+
+        for (char c : fp.internal_path)
         {
             subheader.path.push_back(c);
         }
+
+        for (unsigned int i = 0; i < pad; ++i)
+        {
+            subheader.path.push_back(0);
+        }
+
+        subheader.pathSize = subheader.path.size();
 
         ++precount;
     }
