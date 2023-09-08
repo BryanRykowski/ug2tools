@@ -46,6 +46,7 @@ bool ReadArgs(int argc, char **argv);
 bool ReadPrespec();
 bool ReadLine(std::ifstream &instream, std::string &outstr);
 bool WritePre();
+bool WritePreHeader(std::ofstream &outstream, const PreHeader &header, unsigned int &sizeout);
 
 int main(int argc, char **argv)
 {
@@ -227,14 +228,33 @@ bool WritePre()
 {
     unsigned int presize = 0;
     unsigned int precount = 0;
+    std::ofstream outstream;
+    std::vector<char> buffer;
+
+    outstream.open(globalValues.outpath, outstream.binary);
+
+    if (outstream.fail())
+    {
+        std::cerr << "Error: Failed to create pre file \"" << globalValues.outpath.string() << "\"" << std::endl;
+        return true;
+    }
+
+    buffer.reserve(1024 * 1024);
+
+    if (WritePreHeader(outstream, PreHeader(), presize))
+    {
+        std::cerr << "Error: Failed to write pre file header" << std::endl;
+        return true;
+    }
 
     for (FilePair fp : globalValues.filelist)
     {
+        std::ifstream instream;
         SubFileHeader subheader;
         unsigned int pad;
         
         std::cout << "file: " << fp.path.string() << std::endl;
-        std::cout << "internal path: " << fp.internal_path << std::endl << std::endl;
+        std::cout << "internal path: " << fp.internal_path << std::endl;
 
         pad = (fp.internal_path.size() % 4) ? (4 - (fp.internal_path.size() % 4)) : 0;
 
@@ -250,6 +270,28 @@ bool WritePre()
 
         subheader.pathSize = subheader.path.size();
 
+        instream.open(fp.path, instream.binary);
+
+        if (!instream.good())
+        {
+            std::cerr << "Error: Failed to open \"" << fp.path.string() << "\"" << std::endl;
+            return true;
+        }
+
+        subheader.inflatedSize = 0;
+        subheader.deflatedSize = 0;
+        buffer.clear();
+        
+        while (!instream.eof())
+        {
+            instream.read(buffer.data() + subheader.inflatedSize, 1024 * 1024);
+            subheader.inflatedSize += instream.gcount();
+        }
+
+        std::cout << "size: " << subheader.inflatedSize << std::endl << std::endl;
+
+        presize += 16 + subheader.pathSize + subheader.inflatedSize;
+
         ++precount;
     }
 
@@ -257,5 +299,11 @@ bool WritePre()
     std::cout << "total files: " << precount << std::endl;
     std::cout << "total size: " << presize << std::endl;
     
+    return false;
+}
+
+bool WritePreHeader(std::ofstream &outstream, const PreHeader &header, unsigned int &sizeout)
+{
+    sizeout += 12;
     return false;
 }
