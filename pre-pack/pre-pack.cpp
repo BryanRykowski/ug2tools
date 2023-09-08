@@ -222,11 +222,18 @@ bool WritePre()
     unsigned int presize = 0;
     unsigned int precount = 0;
 
-
     for (FilePair fp : globalValues.filelist)
     {
+        SubFileHeader subheader;
+        unsigned int diff;
+        
         std::cout << "file: " << fp.first.string() << std::endl;
         std::cout << "internal path: " << fp.second << std::endl << std::endl;
+
+        for (char c : fp.second)
+        {
+            subheader.path.push_back(c);
+        }
 
         ++precount;
     }
