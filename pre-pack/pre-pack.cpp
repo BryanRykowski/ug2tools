@@ -301,6 +301,14 @@ bool WritePre()
             return true;
         }
 
+        outstream.write(buffer.data(), subheader.inflatedSize);
+
+        if (outstream.fail())
+        {
+            std::cerr << "Error: Failed to write sub file" << std::endl;
+            return true;
+        }
+
         std::cout << "size: " << subheader.inflatedSize << std::endl << std::endl;
 
         presize += subheader.inflatedSize;
@@ -319,9 +327,9 @@ bool WritePre()
         return true;
     }
 
-    std::cout << globalValues.outpath.string() << std::endl << std::endl;
-    std::cout << "total files: " << precount << std::endl;
-    std::cout << "total size: " << presize << std::endl;
+    std::cout << globalValues.outpath.string() << std::endl;
+    std::cout << "total files: " << header.numFiles << std::endl;
+    std::cout << "total size: " << header.size << std::endl;
     
     return false;
 }
