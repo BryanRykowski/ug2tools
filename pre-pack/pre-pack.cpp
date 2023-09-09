@@ -46,6 +46,7 @@ bool ReadPrespec();
 bool ReadLine(std::ifstream &instream, std::string &outstr);
 bool WritePre();
 bool WritePreHeader(std::ofstream &outstream, const PreHeader &header, unsigned int &sizeout);
+bool WriteSubFileHeader(std::ofstream &outstream, const SubFileHeader &subheader, unsigned int &sizeout);
 
 int main(int argc, char **argv)
 {
@@ -294,9 +295,15 @@ bool WritePre()
             subheader.inflatedSize += instream.gcount();
         }
 
+        if (WriteSubFileHeader(outstream, subheader, presize))
+        {
+            std::cerr << "Error: Failed to write sub file header" << std::endl;
+            return true;
+        }
+
         std::cout << "size: " << subheader.inflatedSize << std::endl << std::endl;
 
-        presize += 16 + subheader.pathSize + subheader.inflatedSize;
+        presize += subheader.inflatedSize;
 
         ++precount;
     }
@@ -344,5 +351,39 @@ bool WritePreHeader(std::ofstream &outstream, const PreHeader &header, unsigned 
     }
 
     sizeout += 12;
+    return false;
+}
+
+bool WriteSubFileHeader(std::ofstream &outstream, const SubFileHeader &subheader, unsigned int &sizeout)
+{
+    std::vector<char> bytes(16);
+
+    bytes[0] = static_cast<char>(0xff & subheader.inflatedSize);
+    bytes[1] = static_cast<char>(0xff & (subheader.inflatedSize >> 8));
+    bytes[2] = static_cast<char>(0xff & (subheader.inflatedSize >> 16));
+    bytes[3] = static_cast<char>(0xff & (subheader.inflatedSize >> 24));
+    bytes[4] = static_cast<char>(0xff & subheader.deflatedSize);
+    bytes[5] = static_cast<char>(0xff & (subheader.deflatedSize >> 8));
+    bytes[6] = static_cast<char>(0xff & (subheader.deflatedSize >> 16));
+    bytes[7] = static_cast<char>(0xff & (subheader.deflatedSize >> 24));
+    bytes[8] = static_cast<char>(0xff & subheader.pathSize);
+    bytes[9] = static_cast<char>(0xff & (subheader.pathSize >> 8));
+    bytes[10] = static_cast<char>(0xff & (subheader.pathSize >> 16));
+    bytes[11] = static_cast<char>(0xff & (subheader.pathSize >> 24));
+    bytes[12] = static_cast<char>(0xff & subheader.pathCRC);
+    bytes[13] = static_cast<char>(0xff & (subheader.pathCRC >> 8));
+    bytes[14] = static_cast<char>(0xff & (subheader.pathCRC >> 16));
+    bytes[15] = static_cast<char>(0xff & (subheader.pathCRC >> 24));
+
+    bytes.insert(bytes.end(), subheader.path.begin(), subheader.path.end());
+
+    outstream.write(bytes.data(), bytes.size());
+
+    if (outstream.fail())
+    {
+        return true;
+    }
+
+    sizeout += bytes.size();
     return false;
 }
