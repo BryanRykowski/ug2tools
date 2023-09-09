@@ -301,6 +301,17 @@ bool WritePre()
         ++precount;
     }
 
+    header.size = presize;
+    header.numFiles = precount;
+
+    outstream.seekp(0);
+
+    if (WritePreHeader(outstream, header, presize))
+    {
+        std::cerr << "Error: Failed to write pre file header" << std::endl;
+        return true;
+    }
+
     std::cout << globalValues.outpath.string() << std::endl << std::endl;
     std::cout << "total files: " << precount << std::endl;
     std::cout << "total size: " << presize << std::endl;
@@ -310,6 +321,28 @@ bool WritePre()
 
 bool WritePreHeader(std::ofstream &outstream, const PreHeader &header, unsigned int &sizeout)
 {
+    char bytes[12];
+
+    bytes[0] = static_cast<char>(0xff & header.size);
+    bytes[1] = static_cast<char>(0xff & (header.size >> 8));
+    bytes[2] = static_cast<char>(0xff & (header.size >> 16));
+    bytes[3] = static_cast<char>(0xff & (header.size >> 24));
+    bytes[4] = 0x3;
+    bytes[5] = 0x0;
+    bytes[6] = 0xcd;
+    bytes[7] = 0xab;
+    bytes[8] = static_cast<char>(0xff & header.numFiles);
+    bytes[9] = static_cast<char>(0xff & (header.numFiles >> 8));
+    bytes[10] = static_cast<char>(0xff & (header.numFiles >> 16));
+    bytes[11] = static_cast<char>(0xff & (header.numFiles >> 24));
+
+    outstream.write(bytes, 12);
+
+    if (outstream.fail())
+    {
+        return true;
+    }
+
     sizeout += 12;
     return false;
 }
