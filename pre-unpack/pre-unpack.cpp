@@ -177,6 +177,8 @@ int main(int argc, char **argv)
                 if (subheader.path[i] == '\\') {slash_loc = i + 1;}
             }
 
+            null_loc = subheader.path.size();
+            
             for (int i = subheader.path.size() - 1; i >=0; --i)
             {
                 if (subheader.path[i] == 0) {null_loc = i;}
