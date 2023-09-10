@@ -19,9 +19,11 @@ pre-unpack file.prx -o outdir
 
 Will place embedded files and file.prespec in outdir/ .
 
-## TODO:
+## Work in progress:
 
 ### pre-pack
+
+## TODO:
 
 ### tex2png
 
