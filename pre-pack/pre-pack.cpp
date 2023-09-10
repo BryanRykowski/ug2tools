@@ -283,17 +283,20 @@ bool WritePre()
         subheader.inflatedSize = 0;
         subheader.deflatedSize = 0;
         buffer.clear();
+        buffer.resize(chunksize);
         
         while (!instream.eof())
         {
-            if (subheader.inflatedSize == buffer.capacity())
+            if (subheader.inflatedSize == buffer.size())
             {
-                buffer.reserve(buffer.capacity() + chunksize);
+                buffer.resize(buffer.size() + chunksize);
             }
 
             instream.read(buffer.data() + subheader.inflatedSize, chunksize);
             subheader.inflatedSize += instream.gcount();
         }
+
+        buffer.resize(subheader.inflatedSize);
 
         if (WriteSubFileHeader(outstream, subheader, presize))
         {
@@ -301,7 +304,7 @@ bool WritePre()
             return true;
         }
 
-        outstream.write(buffer.data(), subheader.inflatedSize);
+        outstream.write(buffer.data(), buffer.size());
 
         if (outstream.fail())
         {
