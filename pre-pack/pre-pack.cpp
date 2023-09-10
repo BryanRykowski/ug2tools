@@ -316,6 +316,21 @@ bool WritePre()
 
         presize += subheader.inflatedSize;
 
+        pad = (presize % 4) ? (4 - (presize % 4)) : 0;
+
+        for (unsigned int i = 0; i < pad; ++i)
+        {
+            outstream.put(0);
+
+            if (outstream.fail())
+            {
+                std::cerr << "Error: Failed to pad sub file" << std::endl;
+                return true;
+            }
+
+            ++presize;
+        }
+
         ++precount;
     }
 
