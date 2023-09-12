@@ -418,6 +418,8 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
         if (subheader.path[i] == '\\') {slash_loc = i;}
     }
 
+    null_loc = subheader.path.size();
+
     for (int i = subheader.path.size() - 1; i >=0; --i)
     {
         if (subheader.path[i] == 0) {null_loc = i;}
