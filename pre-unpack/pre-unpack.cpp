@@ -390,7 +390,7 @@ bool SkipSubFile(std::ifstream &infile, const SubFileHeader &subheader)
     {
         if (!infile.good())
         {
-            std::cout << "Error: Failed to skip subfile" << std::endl;
+            std::cerr << "Error: Failed to skip subfile" << std::endl;
             return true;
         }
 
@@ -435,7 +435,7 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
     // Check if the file already exists and fail if necessary.
     if (!globalValues.overwrite && std::filesystem::exists(outpath))
     {
-        std::cout << "Error: file \"" << outpath << "\" already exists and overwrite not enabled" << std::endl;
+        std::cerr << "Error: file \"" << outpath << "\" already exists and overwrite not enabled" << std::endl;
         return true;
     }
 
@@ -459,7 +459,7 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
         {
             if (!infile.get(c))
             {
-                std::cout << "Error: Failed to inflate subfile" << std::endl;
+                std::cerr << "Error: Failed to inflate subfile" << std::endl;
                 return true;
             }
             
@@ -508,7 +508,7 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
             // Read the type byte of the next segment.
             if (!infile.get(c))
             {
-                std::cout << "Error: Failed to inflate subfile" << std::endl;
+                std::cerr << "Error: Failed to inflate subfile" << std::endl;
                 return true;
             }
             ++subfile_pos;
@@ -530,7 +530,7 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
 
                     if (!infile.get(c))
                     {
-                        std::cout << "Error: Failed to inflate subfile" << std::endl;
+                        std::cerr << "Error: Failed to inflate subfile" << std::endl;
                         return true;
                     }
                     ++subfile_pos;
@@ -554,7 +554,7 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
                     
                     if (!infile.get(c))
                     {
-                        std::cout << "Error: Failed to inflate subfile" << std::endl;
+                        std::cerr << "Error: Failed to inflate subfile" << std::endl;
                         return true;
                     }
                     ++subfile_pos;
@@ -563,7 +563,7 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
 
                     if (!infile.get(c))
                     {
-                        std::cout << "Error: Failed to inflate subfile" << std::endl;
+                        std::cerr << "Error: Failed to inflate subfile" << std::endl;
                         return true;
                     }
                     ++subfile_pos;
@@ -605,7 +605,7 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
     {
         if (!infile.good())
         {
-            std::cout << "Error: Failed to pad subfile" << std::endl;
+            std::cerr << "Error: Failed to pad subfile" << std::endl;
             return true;
         }
 
