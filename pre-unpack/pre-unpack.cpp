@@ -441,6 +441,12 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
 
     outfile.open(outpath, outfile.binary);
 
+    if (outfile.fail())
+    {
+        std::cerr << "Error: Unable to create file \"" << outpath << "\"" << std::endl;
+        return true;
+    }
+
     // Check if the subfile is compressed. Uncompressed files have a deflated
     // size of 0.
     if (subheader.deflatedSize == 0)
