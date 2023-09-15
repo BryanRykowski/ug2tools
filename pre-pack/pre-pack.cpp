@@ -25,6 +25,7 @@
 #include <fstream>
 #include "../common/pre_header.hpp"
 #include "../common/subfile_header.hpp"
+#include "../common/crc.hpp"
 
 struct FilePair
 {
@@ -258,6 +259,8 @@ bool WritePre()
         std::cout << "file: " << fp.path.string() << std::endl;
         std::cout << "internal path: " << fp.internal_path << std::endl;
 
+        subheader.pathCRC = StringCRC(fp.internal_path);
+        
         pad = (fp.internal_path.size() % 4) ? (4 - (fp.internal_path.size() % 4)) : 0;
 
         for (char c : fp.internal_path)
