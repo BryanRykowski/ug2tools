@@ -209,10 +209,10 @@ int main(int argc, char **argv)
 
 void PrintHelp()
 {
-    std::cout << "Usage: pre-unpack [FILE] [OPTION]..." << std::endl << std::endl;
+    std::cout << "Usage: ug2-pre-unpack [FILE] [OPTION]..." << std::endl << std::endl;
     std::cout << "Extract files embedded in pre/prx files." << std::endl << std::endl;
     std::cout << "Example:" << std::endl << std::endl;
-    std::cout << "        pre-unpack infile.prx -wo data/pre" << std::endl << std::endl;
+    std::cout << "        ug2-pre-unpack infile.prx -wo data/pre" << std::endl << std::endl;
     std::cout << "        Lists the contents of \"infile.prx\" and extracts them to" << std::endl;
     std::cout << "        ./data/pre, overwriting any existing versions of the files." << std::endl << std::endl;
     std::cout << "Options:" << std::endl;
