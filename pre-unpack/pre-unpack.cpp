@@ -222,6 +222,7 @@ void PrintHelp()
     std::cout << "    -w              Overwrite existing files" << std::endl;
     std::cout << "    -p              Disable prespec file generation." << std::endl;
     std::cout << "    -P              Disable absolute paths in prespec file." << std::endl;
+    std::cout << "    -n              Don't extract files or generate prespec." << std::endl;
 }
 
 bool ReadArgs(int argc, char **argv)
