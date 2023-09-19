@@ -88,7 +88,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    if (globalValues.prespec)
+    if (globalValues.prespec && globalValues.unpack)
     {
         std::filesystem::path prespecpath = globalValues.outDir / globalValues.inpath.filename();
         prespecpath.replace_extension("prespec");
@@ -167,7 +167,7 @@ int main(int argc, char **argv)
             }
         }
 
-        if (globalValues.prespec)
+        if (globalValues.prespec && globalValues.unpack)
         {
             std::vector<char>::difference_type slash_loc = 0;
             std::vector<char>::difference_type null_loc = 0;
