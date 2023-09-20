@@ -43,8 +43,10 @@ struct
     bool overwrite = false;
     bool pack = true;
     bool quiet = false;
+    bool printhelp = false;
 } globalValues;
 
+void PrintHelp();
 bool ReadArgs(int argc, char **argv);
 bool ReadPrespec();
 bool ReadLine(std::ifstream &instream, std::string &outstr);
@@ -58,6 +60,7 @@ int main(int argc, char **argv)
     {
         std::cerr << "Error: No arguments" << std::endl;
         std::cerr << "Packing failed." << std::endl;
+        PrintHelp();
         return -1;
     }
 
@@ -65,6 +68,12 @@ int main(int argc, char **argv)
     {
         std::cerr << "Packing failed." << std::endl;
         return -1;
+    }
+
+    if (globalValues.printhelp)
+    {
+        PrintHelp();
+        return 0;
     }
 
     if (!globalValues.prespecpath.empty())
@@ -95,6 +104,24 @@ int main(int argc, char **argv)
     }
 
     return 0;
+}
+
+void PrintHelp()
+{
+    std::cout << "Usage: ug2-pre-pack [FILE] [OPTION]..." << std::endl << std::endl;
+    std::cout << "Embed game resources in pre/prx file." << std::endl << std::endl;
+    std::cout << "Examples:" << std::endl << std::endl;
+    std::cout << "        ug2-pre-pack in.prespec -o out.pre" << std::endl << std::endl;
+    std::cout << "        Create out.pre and insert the files listed in in.prespec." << std::endl << std::endl << std::endl;
+    std::cout << "        ug2-pre-pack -o somewhere/name.pre -f file1.qb internal\\\\path\\\\file1.qb -f file2.col.xbx other\\\\internal\\\\path\\\\file2.col.xbx" << std::endl << std::endl;
+    std::cout << "        Manually specify files and their internal paths using the -f switch and write pre file in specific location." << std::endl << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << "    -h                          Print this help text" << std::endl;
+    std::cout << "    -o PATH                     Output file at PATH instead of out.pre in current directory" << std::endl;
+    std::cout << "    -f FILE INTERNAL_PATH       Embed FILE with internal path INTERNAL_PATH" << std::endl;
+    std::cout << "    -q                          Suppress some output. Does not include errors" << std::endl;
+    std::cout << "    -w                          Overwrite existing file" << std::endl;
+    std::cout << "    -n                          Don't create pre file, just list files" << std::endl;
 }
 
 bool ReadArgs(int argc, char **argv)
@@ -161,6 +188,10 @@ bool ReadArgs(int argc, char **argv)
                 else if (c == 'q')
                 {
                     globalValues.quiet = true;
+                }
+                else if (c == 'h')
+                {
+                    globalValues.printhelp = true;
                 }
             }
         }
