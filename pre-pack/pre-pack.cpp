@@ -40,6 +40,7 @@ struct
     std::filesystem::path prespecpath;
     std::filesystem::path outpath = "out.pre";
     std::vector<FilePair> filelist;
+    bool overwrite = false;
 } globalValues;
 
 bool ReadArgs(int argc, char **argv);
@@ -142,6 +143,10 @@ bool ReadArgs(int argc, char **argv)
                     ++i;
                     globalValues.outpath = argv[i];
                 }
+                else if (c == 'w')
+                {
+                    globalValues.overwrite = true;
+                }
             }
         }
         else
@@ -234,6 +239,12 @@ bool WritePre()
     PreHeader header;
     const unsigned int chunksize = 1024 * 1024;
 
+    if (std::filesystem::exists(globalValues.outpath) && !globalValues.overwrite)
+    {
+        std::cerr << "Error: file \"" << globalValues.outpath.string() << "\" already exists and overwrite not enabled" << std::endl;
+        return true;
+    }
+    
     outstream.open(globalValues.outpath, outstream.binary);
 
     if (outstream.fail())
