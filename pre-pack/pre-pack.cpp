@@ -261,7 +261,9 @@ bool WritePre()
 
         subheader.pathCRC = StringCRC(fp.internal_path);
         
-        pad = (fp.internal_path.size() % 4) ? (4 - (fp.internal_path.size() % 4)) : 0;
+        // Even if the path string ends up being a multiple of 4 we need to pad it because there
+        // needs to be a null at the end.
+        pad = 4 - (fp.internal_path.size() % 4);
 
         for (char c : fp.internal_path)
         {
