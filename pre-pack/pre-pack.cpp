@@ -41,6 +41,7 @@ struct
     std::filesystem::path outpath = "out.pre";
     std::vector<FilePair> filelist;
     bool overwrite = false;
+    bool pack = true;
 } globalValues;
 
 bool ReadArgs(int argc, char **argv);
@@ -147,6 +148,10 @@ bool ReadArgs(int argc, char **argv)
                 {
                     globalValues.overwrite = true;
                 }
+                else if (c == 'n')
+                {
+                    globalValues.pack = false;
+                }
             }
         }
         else
@@ -239,26 +244,29 @@ bool WritePre()
     PreHeader header;
     const unsigned int chunksize = 1024 * 1024;
 
-    if (std::filesystem::exists(globalValues.outpath) && !globalValues.overwrite)
-    {
-        std::cerr << "Error: file \"" << globalValues.outpath.string() << "\" already exists and overwrite not enabled" << std::endl;
-        return true;
-    }
-    
-    outstream.open(globalValues.outpath, outstream.binary);
-
-    if (outstream.fail())
-    {
-        std::cerr << "Error: Failed to create pre file \"" << globalValues.outpath.string() << "\"" << std::endl;
-        return true;
-    }
-
     buffer.reserve(chunksize);
-
-    if (WritePreHeader(outstream, PreHeader(), presize))
+    
+    if (globalValues.pack)
     {
-        std::cerr << "Error: Failed to write pre file header" << std::endl;
-        return true;
+        if (std::filesystem::exists(globalValues.outpath) && !globalValues.overwrite)
+        {
+            std::cerr << "Error: file \"" << globalValues.outpath.string() << "\" already exists and overwrite not enabled" << std::endl;
+            return true;
+        }
+        
+        outstream.open(globalValues.outpath, outstream.binary);
+
+        if (outstream.fail())
+        {
+            std::cerr << "Error: Failed to create pre file \"" << globalValues.outpath.string() << "\"" << std::endl;
+            return true;
+        }
+
+        if (WritePreHeader(outstream, PreHeader(), presize))
+        {
+            std::cerr << "Error: Failed to write pre file header" << std::endl;
+            return true;
+        }
     }
 
     for (FilePair fp : globalValues.filelist)
@@ -314,18 +322,21 @@ bool WritePre()
 
         buffer.resize(subheader.inflatedSize);
 
-        if (WriteSubFileHeader(outstream, subheader, presize))
+        if (globalValues.pack)
         {
-            std::cerr << "Error: Failed to write sub file header" << std::endl;
-            return true;
-        }
+            if (WriteSubFileHeader(outstream, subheader, presize))
+            {
+                std::cerr << "Error: Failed to write sub file header" << std::endl;
+                return true;
+            }
 
-        outstream.write(buffer.data(), buffer.size());
+            outstream.write(buffer.data(), buffer.size());
 
-        if (outstream.fail())
-        {
-            std::cerr << "Error: Failed to write sub file" << std::endl;
-            return true;
+            if (outstream.fail())
+            {
+                std::cerr << "Error: Failed to write sub file" << std::endl;
+                return true;
+            }
         }
 
         std::cout << "size: " << subheader.inflatedSize << std::endl << std::endl;
@@ -336,12 +347,15 @@ bool WritePre()
 
         for (unsigned int i = 0; i < pad; ++i)
         {
-            outstream.put(0);
-
-            if (outstream.fail())
+            if (globalValues.pack)
             {
-                std::cerr << "Error: Failed to pad sub file" << std::endl;
-                return true;
+                outstream.put(0);
+
+                if (outstream.fail())
+                {
+                    std::cerr << "Error: Failed to pad sub file" << std::endl;
+                    return true;
+                }
             }
 
             ++presize;
@@ -353,12 +367,15 @@ bool WritePre()
     header.size = presize;
     header.numFiles = precount;
 
-    outstream.seekp(0);
-
-    if (WritePreHeader(outstream, header, presize))
+    if (globalValues.pack)
     {
-        std::cerr << "Error: Failed to write pre file header" << std::endl;
-        return true;
+        outstream.seekp(0);
+
+        if (WritePreHeader(outstream, header, presize))
+        {
+            std::cerr << "Error: Failed to write pre file header" << std::endl;
+            return true;
+        }
     }
 
     std::cout << globalValues.outpath.string() << std::endl;
