@@ -42,6 +42,7 @@ struct
     std::vector<FilePair> filelist;
     bool overwrite = false;
     bool pack = true;
+    bool quiet = false;
 } globalValues;
 
 bool ReadArgs(int argc, char **argv);
@@ -86,6 +87,11 @@ int main(int argc, char **argv)
     {
         std::cerr << "Packing failed." << std::endl;
         return -1;
+    }
+
+    if (!globalValues.quiet)
+    {
+        std::cout << "Packing successful." << std::endl;
     }
 
     return 0;
@@ -151,6 +157,10 @@ bool ReadArgs(int argc, char **argv)
                 else if (c == 'n')
                 {
                     globalValues.pack = false;
+                }
+                else if (c == 'q')
+                {
+                    globalValues.quiet = true;
                 }
             }
         }
@@ -275,8 +285,11 @@ bool WritePre()
         SubFileHeader subheader;
         unsigned int pad;
         
-        std::cout << "file: " << fp.path.string() << std::endl;
-        std::cout << "internal path: " << fp.internal_path << std::endl;
+        if (!globalValues.quiet)
+        {
+            std::cout << "file: " << fp.path.string() << std::endl;
+            std::cout << "internal path: " << fp.internal_path << std::endl;
+        }
 
         subheader.pathCRC = StringCRC(fp.internal_path);
         
@@ -339,7 +352,10 @@ bool WritePre()
             }
         }
 
-        std::cout << "size: " << subheader.inflatedSize << std::endl << std::endl;
+        if (!globalValues.quiet)
+        {
+            std::cout << "size: " << subheader.inflatedSize << std::endl << std::endl;
+        }
 
         presize += subheader.inflatedSize;
 
@@ -378,9 +394,12 @@ bool WritePre()
         }
     }
 
-    std::cout << globalValues.outpath.string() << std::endl;
-    std::cout << "total files: " << header.numFiles << std::endl;
-    std::cout << "total size: " << header.size << std::endl;
+    if (!globalValues.quiet)
+    {
+        std::cout << globalValues.outpath.string() << std::endl;
+        std::cout << "total files: " << header.numFiles << std::endl;
+        std::cout << "total size: " << header.size << std::endl;
+    }
     
     return false;
 }
