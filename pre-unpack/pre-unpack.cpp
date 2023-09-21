@@ -350,16 +350,8 @@ bool SkipSubFile(std::ifstream &infile, const SubFileHeader &subheader)
         skipCount = subheader.deflatedSize;
     }
 
-    padding = skipCount % 4;
-    
-    if (padding)
-    {
-        padding = (4 - padding);
-        skipCount += padding;
-    }
-
-    // Every segment of a pre/prx file is aligned to a 4 byte boundary.
-    // This means we need to skip between 1 and 3 bytes to get to the next subfile's header.
+    // Align the skip to a multiple of 4.
+    skipCount += (skipCount % 4) ? (4 - (skipCount % 4)) : 0;
 
     for (unsigned int i = 0; i < skipCount; ++i)
     {
