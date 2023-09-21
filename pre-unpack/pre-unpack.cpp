@@ -20,6 +20,7 @@
 
 #include "../common/pre_header.hpp"
 #include "../common/subfile_header.hpp"
+#include "../common/read_word.hpp"
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -296,22 +297,10 @@ bool ReadHeader(std::ifstream &infile, PreHeader &outheader)
         return true;
     }
 
-    // This might seem like overkill but I want this to work on big endian platforms just in case.
-    outheader.size = static_cast<unsigned char>(bytes[0]);
-    outheader.size |= static_cast<unsigned char>(bytes[1]) << 8;
-    outheader.size |= static_cast<unsigned char>(bytes[2]) << 16;
-    outheader.size |= static_cast<unsigned char>(bytes[3]) << 24;
-
-    outheader.version = static_cast<unsigned char>(bytes[4]);
-    outheader.version |= static_cast<unsigned char>(bytes[5]) << 8;
-    
-    outheader.unknown = static_cast<unsigned char>(bytes[6]);
-    outheader.unknown |= static_cast<unsigned char>(bytes[7]) << 8;
-
-    outheader.numFiles = static_cast<unsigned char>(bytes[8]);
-    outheader.numFiles |= static_cast<unsigned char>(bytes[9]) << 8;
-    outheader.numFiles |= static_cast<unsigned char>(bytes[10]) << 16;
-    outheader.numFiles |= static_cast<unsigned char>(bytes[11]) << 24;
+    outheader.size = read_u32le(bytes);
+    outheader.version = read_u16le(&bytes[4]);
+    outheader.unknown = read_u16le(&bytes[6]);
+    outheader.numFiles = read_u32le(&bytes[8]);
     
     return false;
 }
@@ -327,25 +316,10 @@ bool ReadSubFileHeader(std::ifstream &infile, SubFileHeader &outsubheader)
         return true;
     }
 
-    outsubheader.inflatedSize = static_cast<unsigned char>(bytes[0]);
-    outsubheader.inflatedSize |= static_cast<unsigned char>(bytes[1]) << 8;
-    outsubheader.inflatedSize |= static_cast<unsigned char>(bytes[2]) << 16;
-    outsubheader.inflatedSize |= static_cast<unsigned char>(bytes[3]) << 24;
-
-    outsubheader.deflatedSize = static_cast<unsigned char>(bytes[4]);
-    outsubheader.deflatedSize |= static_cast<unsigned char>(bytes[5]) << 8;
-    outsubheader.deflatedSize |= static_cast<unsigned char>(bytes[6]) << 16;
-    outsubheader.deflatedSize |= static_cast<unsigned char>(bytes[7]) << 24;
-
-    outsubheader.pathSize = static_cast<unsigned char>(bytes[8]);
-    outsubheader.pathSize |= static_cast<unsigned char>(bytes[9]) << 8;
-    outsubheader.pathSize |= static_cast<unsigned char>(bytes[10]) << 16;
-    outsubheader.pathSize |= static_cast<unsigned char>(bytes[11]) << 24;
-
-    outsubheader.pathCRC = static_cast<unsigned char>(bytes[12]);
-    outsubheader.pathCRC |= static_cast<unsigned char>(bytes[13]) << 8;
-    outsubheader.pathCRC |= static_cast<unsigned char>(bytes[14]) << 16;
-    outsubheader.pathCRC |= static_cast<unsigned char>(bytes[15]) << 24;
+    outsubheader.inflatedSize = read_u32le(bytes);
+    outsubheader.deflatedSize = read_u32le(&bytes[4]);
+    outsubheader.pathSize = read_u32le(&bytes[8]);
+    outsubheader.pathCRC = read_u32le(&bytes[12]);
 
     outsubheader.path.resize(outsubheader.pathSize);
     infile.read(reinterpret_cast<std::ifstream::char_type*>(&outsubheader.path.front()), outsubheader.pathSize);
