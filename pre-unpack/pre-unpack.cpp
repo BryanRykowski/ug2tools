@@ -339,7 +339,6 @@ bool ReadSubFileHeader(std::ifstream &infile, SubFileHeader &outsubheader)
 bool SkipSubFile(std::ifstream &infile, const SubFileHeader &subheader)
 {
     unsigned int skipCount;
-    unsigned int padding;
 
     if (subheader.deflatedSize == 0)
     {
@@ -561,12 +560,7 @@ bool ExtractSubFile(std::ifstream &infile, const SubFileHeader &subheader)
     // Every section of a pre/prx file is aligned to 4 byte boundaries. If the subfile is not a multiple of 4
     // bytes long we need to skip between 1 and 3 bytes to get to the next subfile's header.
     
-    padding = readCount % 4;
-
-    if (padding)
-    {
-        padding = (4 - padding);
-    }
+    padding = (readCount % 4) ? (4 - (readCount % 4)) : 0;
 
     for (unsigned int i = 0; i < padding; ++i)
     {
