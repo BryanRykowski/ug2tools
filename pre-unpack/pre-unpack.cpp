@@ -352,15 +352,12 @@ bool SkipSubFile(std::ifstream &infile, const SubFileHeader &subheader)
     // Align the skip to a multiple of 4.
     skipCount += (skipCount % 4) ? (4 - (skipCount % 4)) : 0;
 
-    for (unsigned int i = 0; i < skipCount; ++i)
-    {
-        if (!infile.good())
-        {
-            std::cerr << "Error: Failed to skip subfile" << std::endl;
-            return true;
-        }
+    infile.ignore(skipCount);
 
-        infile.get();
+    if (infile.fail() || infile.gcount() != skipCount)
+    {
+        std::cerr << "Error: Failed to skip sub file" << std::endl;
+        return true;
     }
 
     return false;
