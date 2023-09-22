@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <fstream>
 #include <stdint.h>
 
 uint16_t read_u16le(const char *in_data);
