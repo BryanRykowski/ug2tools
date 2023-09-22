@@ -32,8 +32,8 @@ Tool|Status
 ---|---
 ug2-pre-unpack|Ready
 ug2-pre-pack|Ready
-ug2-tex2png|
-ug2-png2tex|
+ug2-tex2dds|
+ug2-dds2tex|
 ug2-img2png|
 ug2-png2img|
 ug2-mdl2obj|
