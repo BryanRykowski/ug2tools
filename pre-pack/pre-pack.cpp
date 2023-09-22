@@ -26,6 +26,7 @@
 #include "../common/pre_header.hpp"
 #include "../common/subfile_header.hpp"
 #include "../common/crc.hpp"
+#include "../common/write_word.hpp"
 
 struct FilePair
 {
@@ -439,18 +440,10 @@ bool WritePreHeader(std::ofstream &outstream, const PreHeader &header, unsigned 
 {
     char bytes[12];
 
-    bytes[0] = static_cast<char>(0xff & header.size);
-    bytes[1] = static_cast<char>(0xff & (header.size >> 8));
-    bytes[2] = static_cast<char>(0xff & (header.size >> 16));
-    bytes[3] = static_cast<char>(0xff & (header.size >> 24));
-    bytes[4] = 0x3;
-    bytes[5] = 0x0;
-    bytes[6] = 0xcd;
-    bytes[7] = 0xab;
-    bytes[8] = static_cast<char>(0xff & header.numFiles);
-    bytes[9] = static_cast<char>(0xff & (header.numFiles >> 8));
-    bytes[10] = static_cast<char>(0xff & (header.numFiles >> 16));
-    bytes[11] = static_cast<char>(0xff & (header.numFiles >> 24));
+    write_u32le(bytes, header.size);
+    write_u16le(&bytes[4], 3);
+    write_u16le(&bytes[6], 0xabcd);
+    write_u32le(&bytes[8], header.numFiles);
 
     outstream.write(bytes, 12);
 
@@ -467,22 +460,10 @@ bool WriteSubFileHeader(std::ofstream &outstream, const SubFileHeader &subheader
 {
     std::vector<char> bytes(16);
 
-    bytes[0] = static_cast<char>(0xff & subheader.inflatedSize);
-    bytes[1] = static_cast<char>(0xff & (subheader.inflatedSize >> 8));
-    bytes[2] = static_cast<char>(0xff & (subheader.inflatedSize >> 16));
-    bytes[3] = static_cast<char>(0xff & (subheader.inflatedSize >> 24));
-    bytes[4] = static_cast<char>(0xff & subheader.deflatedSize);
-    bytes[5] = static_cast<char>(0xff & (subheader.deflatedSize >> 8));
-    bytes[6] = static_cast<char>(0xff & (subheader.deflatedSize >> 16));
-    bytes[7] = static_cast<char>(0xff & (subheader.deflatedSize >> 24));
-    bytes[8] = static_cast<char>(0xff & subheader.pathSize);
-    bytes[9] = static_cast<char>(0xff & (subheader.pathSize >> 8));
-    bytes[10] = static_cast<char>(0xff & (subheader.pathSize >> 16));
-    bytes[11] = static_cast<char>(0xff & (subheader.pathSize >> 24));
-    bytes[12] = static_cast<char>(0xff & subheader.pathCRC);
-    bytes[13] = static_cast<char>(0xff & (subheader.pathCRC >> 8));
-    bytes[14] = static_cast<char>(0xff & (subheader.pathCRC >> 16));
-    bytes[15] = static_cast<char>(0xff & (subheader.pathCRC >> 24));
+    write_u32le(&bytes[0], subheader.inflatedSize);
+    write_u32le(&bytes[4], subheader.deflatedSize);
+    write_u32le(&bytes[8], subheader.pathSize);
+    write_u32le(&bytes[12], subheader.pathCRC);
 
     bytes.insert(bytes.end(), subheader.path.begin(), subheader.path.end());
 
