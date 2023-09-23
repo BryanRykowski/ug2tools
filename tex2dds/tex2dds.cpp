@@ -42,6 +42,7 @@ struct TexImageHeader
 struct
 {
     std::filesystem::path in_path;
+    bool quiet = false;
 } options;
 
 bool ReadArgs(int argc, char **argv);
@@ -74,7 +75,10 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    std::cout << "file: " << options.in_path.string() << std::endl;
+    if (!options.quiet)
+    {
+        std::cout << "file: " << options.in_path.string() << std::endl;
+    }
 
     if (ReadFileHeader(in_stream, header))
     {
@@ -82,18 +86,38 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    std::cout << "images: " << header.num_files << std::endl << std::endl;
+    if (!options.quiet)
+    {
+        std::cout << "images: " << header.num_files << std::endl << std::endl;
+    }
     
     return 0;
 }
 
 bool ReadArgs(int argc, char **argv)
 {
+    std::string arg;
+
     for (int i = 1; i < argc; ++i)
     {
-        std::string arg = argv[i];
+        arg = argv[i];
 
-        options.in_path = arg;
+        if ((arg[0] == '-') && (arg.size() > 1))
+        {
+            std::string switches = arg.substr(1, arg.size() - 1);
+
+            for (char c : switches)
+            {
+                if (c == 'q')
+                {
+                    options.quiet = true;
+                }
+            }
+        }
+        else
+        {
+            options.in_path = arg;
+        }
     }
     
     return false;
