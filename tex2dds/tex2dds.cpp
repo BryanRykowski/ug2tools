@@ -22,6 +22,7 @@
 #include <fstream>
 #include <filesystem>
 #include <iostream>
+#include <iomanip>
 #include "../common/read_word.hpp"
 
 struct TexFileHeader
@@ -47,6 +48,9 @@ struct
 
 bool ReadArgs(int argc, char **argv);
 bool ReadFileHeader(std::ifstream &in_stream, TexFileHeader &out_header);
+bool ReadImageHeader(std::ifstream &in_stream, TexImageHeader &out_header);
+bool ReadImageLevel(std::ifstream &in_stream);
+bool ReadImage(std::ifstream &in_stream);
 
 int main(int argc, char **argv)
 {
@@ -89,6 +93,20 @@ int main(int argc, char **argv)
     if (!options.quiet)
     {
         std::cout << "images: " << header.num_files << std::endl << std::endl;
+        std::cout << "index | checksum | mipmap levels | dxt version | dimensions" << std::endl << std::endl;
+    }
+
+    for (unsigned int i = 0; i < header.num_files; ++i)
+    {
+        int w = (header.num_files > 9) ? 2 : 1;
+
+        if (!options.quiet) std::cout << std::setw(w) << std::left <<  i << std::setw(0) << " ";
+        
+        if (ReadImage(in_stream))
+        {
+            std::cerr << "Unpack failed." << std::endl;
+            return -1;
+        }
     }
     
     return 0;
@@ -137,6 +155,74 @@ bool ReadFileHeader(std::ifstream &in_stream, TexFileHeader &out_header)
 
     out_header.version = read_u32le(&buffer[0]);
     out_header.num_files = read_u32le(&buffer[4]);
+
+    return false;
+}
+
+bool ReadImageHeader(std::ifstream &in_stream, TexImageHeader &out_header)
+{
+    char buffer[32];
+
+    in_stream.read(buffer, 32);
+
+    if (in_stream.fail() || in_stream.gcount() != 32)
+    {
+        std::cerr << "Error: Failed to read image header" << std::endl;
+        return true;
+    }
+
+    out_header.checksum = read_u32le(&buffer[0]);
+    out_header.width = read_u32le(&buffer[4]);
+    out_header.height = read_u32le(&buffer[8]);
+    out_header.levels = read_u32le(&buffer[12]);
+    out_header.dxt = read_u32le(&buffer[24]);
+
+    return false;
+}
+
+bool ReadImageLevel(std::ifstream &in_stream)
+{
+    char buffer[4];
+    unsigned int data_size;
+    
+    in_stream.read(buffer, 4);
+    data_size = read_u32le(buffer);
+
+    in_stream.ignore(data_size);
+
+    if (in_stream.fail() || in_stream.gcount() != data_size)
+    {
+        std::cerr << "Error: Failed to skip image data" << std::endl;
+        return true;
+    }
+
+    return false;
+}
+
+bool ReadImage(std::ifstream &in_stream)
+{
+    TexImageHeader i_header;
+    
+    if (ReadImageHeader(in_stream, i_header))
+    {
+        return true;
+    }
+
+    if (!options.quiet)
+    {
+        std::cout << "0x" << std::hex <<  i_header.checksum << std::dec << " ";
+        std::cout << i_header.levels << " ";
+        std::cout << i_header.dxt << " ";
+        std::cout << i_header.width << "x" << i_header.height << std::endl;
+    }
+
+    for (unsigned int i = 0; i < i_header.levels; ++i)
+    {
+        if (ReadImageLevel(in_stream))
+        {
+            return true;
+        }
+    }
 
     return false;
 }
