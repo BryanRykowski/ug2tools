@@ -23,6 +23,7 @@
 #include <filesystem>
 #include <iostream>
 #include <iomanip>
+#include <memory>
 #include "../common/read_word.hpp"
 
 struct TexFileHeader
@@ -44,12 +45,14 @@ struct
 {
     std::filesystem::path in_path;
     bool quiet = false;
+    bool write = true;
 } options;
 
 bool ReadArgs(int argc, char **argv);
 bool ReadFileHeader(std::ifstream &in_stream, TexFileHeader &out_header);
 bool ReadImageHeader(std::ifstream &in_stream, TexImageHeader &out_header);
-bool ReadImageLevel(std::ifstream &in_stream);
+bool SkipImageLevel(std::ifstream &in_stream);
+bool ReadImageLevel(std::ifstream &in_stream, std::ofstream &out_stream);
 bool ReadImage(std::ifstream &in_stream);
 
 int main(int argc, char **argv)
@@ -130,6 +133,10 @@ bool ReadArgs(int argc, char **argv)
                 {
                     options.quiet = true;
                 }
+                else if (c == 'n')
+                {
+                    options.write = false;
+                }
             }
         }
         else
@@ -180,13 +187,13 @@ bool ReadImageHeader(std::ifstream &in_stream, TexImageHeader &out_header)
     return false;
 }
 
-bool ReadImageLevel(std::ifstream &in_stream)
+bool SkipImageLevel(std::ifstream &in_stream)
 {
-    char buffer[4];
+    char size_buffer[4];
     unsigned int data_size;
     
-    in_stream.read(buffer, 4);
-    data_size = read_u32le(buffer);
+    in_stream.read(size_buffer, 4);
+    data_size = read_u32le(size_buffer);
 
     in_stream.ignore(data_size);
 
@@ -199,9 +206,54 @@ bool ReadImageLevel(std::ifstream &in_stream)
     return false;
 }
 
+bool ReadImageLevel(std::ifstream &in_stream, std::ofstream &out_stream)
+{
+    char size_buffer[4];
+    unsigned int data_size;
+    auto data_buffer = std::make_unique<char[]>(1024);
+    unsigned int pos = 0;
+    
+    in_stream.read(size_buffer, 4);
+    data_size = read_u32le(size_buffer);
+
+    while (pos < data_size)
+    {
+        unsigned int read_count = (data_size - pos > 1024) ? 1024 : (data_size - pos);
+        
+        in_stream.read(data_buffer.get(), read_count);
+
+        if (in_stream.fail() || in_stream.gcount() != read_count)
+        {
+            std::cerr << "Error: Failed to read image data" << std::endl;
+            return true;
+        }
+
+        /*
+        out_stream.write(data_buffer.get(), read_count);
+
+        if (out_stream.fail())
+        {
+            std::cerr << "Error: Failed to write image data" << std::endl;
+            return true;
+        }
+        */
+
+        pos += read_count;
+    }
+
+    if (pos != data_size)
+    {
+        std::cerr << "Error: Failed to read/write image data" << std::endl;
+        return true;
+    }
+
+    return false;
+}
+
 bool ReadImage(std::ifstream &in_stream)
 {
     TexImageHeader i_header;
+    std::ofstream out_stream;
     
     if (ReadImageHeader(in_stream, i_header))
     {
@@ -218,9 +270,19 @@ bool ReadImage(std::ifstream &in_stream)
 
     for (unsigned int i = 0; i < i_header.levels; ++i)
     {
-        if (ReadImageLevel(in_stream))
+        if (options.write)
         {
-            return true;
+            if (ReadImageLevel(in_stream, out_stream))
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if (SkipImageLevel(in_stream))
+            {
+                return true;
+            }
         }
     }
 
