@@ -23,7 +23,7 @@
 struct DdsPixelFormat
 {
     uint32_t flags;
-    uint32_t fourcc;
+    char fourcc[4];
     uint32_t rgb_bits;
     uint32_t r_bitmask;
     uint32_t g_bitmask;
