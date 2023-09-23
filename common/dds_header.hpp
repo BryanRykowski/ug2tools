@@ -22,7 +22,6 @@
 
 struct DdsPixelFormat
 {
-    uint32_t size;
     uint32_t flags;
     uint32_t fourcc;
     uint32_t rgb_bits;
@@ -34,7 +33,6 @@ struct DdsPixelFormat
 
 struct DdsFileHeader
 {
-    uint32_t size;
     uint32_t flags;
     uint32_t height;
     uint32_t width;
