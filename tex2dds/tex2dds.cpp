@@ -22,6 +22,7 @@
 #include <fstream>
 #include <filesystem>
 #include <iostream>
+#include "../common/read_word.hpp"
 
 struct TexFileHeader
 {
@@ -44,10 +45,12 @@ struct
 } options;
 
 bool ReadArgs(int argc, char **argv);
+bool ReadFileHeader(std::ifstream &in_stream, TexFileHeader &out_header);
 
 int main(int argc, char **argv)
 {
     std::ifstream in_stream;
+    TexFileHeader header;
 
     if (argc < 2)
     {
@@ -70,6 +73,16 @@ int main(int argc, char **argv)
         std::cerr << "Unpack failed." << std::endl;
         return -1;
     }
+
+    std::cout << "file: " << options.in_path.string() << std::endl;
+
+    if (ReadFileHeader(in_stream, header))
+    {
+        std::cerr << "Unpack failed." << std::endl;
+        return -1;
+    }
+
+    std::cout << "images: " << header.num_files << std::endl << std::endl;
     
     return 0;
 }
@@ -83,5 +96,23 @@ bool ReadArgs(int argc, char **argv)
         options.in_path = arg;
     }
     
+    return false;
+}
+
+bool ReadFileHeader(std::ifstream &in_stream, TexFileHeader &out_header)
+{
+    char buffer[8];
+
+    in_stream.read(buffer, 8);
+
+    if (in_stream.fail() || in_stream.gcount() != 8)
+    {
+        std::cerr << "Error: Failed to read file header" << std::endl;
+        return true;
+    }
+
+    out_header.version = read_u32le(&buffer[0]);
+    out_header.num_files = read_u32le(&buffer[4]);
+
     return false;
 }
