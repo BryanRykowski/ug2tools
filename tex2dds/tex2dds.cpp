@@ -99,6 +99,13 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    if (header.version != 1)
+    {
+        std::cerr << "Error: byte 0 is not 0x1, this isn't a tex.xbx file" << std::endl;
+        std::cerr << "Unpack failed." << std::endl;
+        return -1;
+    }
+
     if (!options.quiet)
     {
         std::cout << "images: " << header.num_files << std::endl << std::endl;
