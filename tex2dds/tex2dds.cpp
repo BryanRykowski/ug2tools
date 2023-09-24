@@ -48,6 +48,7 @@ struct TexImageHeader
 struct
 {
     std::filesystem::path in_path;
+    std::filesystem::path out_dir;
     bool quiet = false;
     bool write = true;
 } options;
@@ -141,6 +142,17 @@ bool ReadArgs(int argc, char **argv)
                 else if (c == 'n')
                 {
                     options.write = false;
+                }
+                else if (c == 'o')
+                {
+                    if (i + 1 >= argc)
+                    {
+                        std::cerr << "Error: Wrong number of arguments after -o" << std::endl;
+                        return true;
+                    }
+
+                    ++i;
+                    options.out_dir = argv[i];
                 }
             }
         }
@@ -352,11 +364,11 @@ bool ReadImage(std::ifstream &in_stream, unsigned int index)
         std::filesystem::path filename = options.in_path.stem().stem();
         filename += "." + std::to_string(index) + ".dds";
         
-        out_stream.open(filename, out_stream.binary);
+        out_stream.open(options.out_dir / filename, out_stream.binary);
 
         if (out_stream.fail())
         {
-            std::cerr << "Error: Failed to open output file" << std::endl;
+            std::cerr << "Error: Failed to open output file \"" << std::filesystem::path(options.out_dir / filename).string() << "\"" << std::endl;
             return true;
         }
 
