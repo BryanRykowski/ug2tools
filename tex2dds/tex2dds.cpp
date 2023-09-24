@@ -28,22 +28,7 @@
 #include "../common/read_word.hpp"
 #include "../common/write_word.hpp"
 #include "../common/dds_header.hpp"
-
-struct TexFileHeader
-{
-    uint32_t version;
-    uint32_t num_files;
-};
-
-struct TexImageHeader
-{
-    uint32_t checksum;
-    uint32_t width;
-    uint32_t height;
-    uint32_t levels;
-    uint32_t dxt;
-    uint32_t size;
-};
+#include "../common/tex_header.hpp"
 
 struct
 {
