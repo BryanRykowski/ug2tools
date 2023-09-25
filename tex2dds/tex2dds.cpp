@@ -48,6 +48,8 @@ bool ReadImageHeader(std::ifstream &in_stream, TexImageHeader &out_header);
 bool ReadImageLevelSize(std::ifstream &in_stream, uint32_t &out_size);
 bool SkipImageLevel(std::ifstream &in_stream, unsigned int size);
 bool ReadImageLevel(std::ifstream &in_stream, std::ofstream &out_stream, unsigned int size);
+bool WriteDdsHeader(std::ofstream &out_stream, const DdsFileHeader &dds_header);
+void BuildDdsHeader(const TexImageHeader &i_header, DdsFileHeader &dds_header);
 bool ReadImage(std::ifstream &in_stream, unsigned int index);
 
 int main(int argc, char **argv)
