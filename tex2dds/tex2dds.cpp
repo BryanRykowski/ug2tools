@@ -34,6 +34,7 @@ struct
 {
     std::filesystem::path in_path;
     std::filesystem::path out_dir;
+    std::filesystem::path filename;
     bool quiet = false;
     bool write = true;
     bool overwrite = false;
@@ -125,7 +126,8 @@ bool ReadArgs(int argc, char **argv)
         if ((arg[0] == '-') && (arg.size() > 1))
         {
             std::string switches = arg.substr(1, arg.size() - 1);
-
+            bool exclusive_sw = false;
+            
             for (char c : switches)
             {
                 if (c == 'q')
@@ -142,6 +144,14 @@ bool ReadArgs(int argc, char **argv)
                 }
                 else if (c == 'o')
                 {
+                    if (exclusive_sw)
+                    {
+                        std::cerr << "Error: Mutually exclusive switches combined" << std::endl;
+                        return true;
+                    }
+
+                    exclusive_sw = true;
+
                     if (i + 1 >= argc)
                     {
                         std::cerr << "Error: Wrong number of arguments after -o" << std::endl;
@@ -150,6 +160,25 @@ bool ReadArgs(int argc, char **argv)
 
                     ++i;
                     options.out_dir = argv[i];
+                }
+                else if (c == 'f')
+                {
+                    if (exclusive_sw)
+                    {
+                        std::cerr << "Error: Mutually exclusive switches combined" << std::endl;
+                        return true;
+                    }
+
+                    exclusive_sw = true;
+
+                    if (i + 1 >= argc)
+                    {
+                        std::cerr << "Error: Wrong number of arguments after -f" << std::endl;
+                        return true;
+                    }
+
+                    ++i;
+                    options.filename = argv[i];
                 }
             }
         }
@@ -361,7 +390,16 @@ bool ReadImage(std::ifstream &in_stream, unsigned int index)
         std::filesystem::path out_path;
 
         out_path = options.out_dir;
-        out_path /= options.in_path.stem().stem();
+        
+        if (options.filename.empty())
+        {
+            out_path /= options.in_path.stem().stem();
+        }
+        else
+        {
+            out_path /= options.filename;
+        }
+
         out_path += "." + std::to_string(index) + ".dds";
 
         if (std::filesystem::exists(out_path) && !options.overwrite)
