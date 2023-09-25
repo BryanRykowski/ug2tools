@@ -71,12 +71,38 @@ Options:
 
 </details>
 
+### ug2-tex2dds
+<details>
+<br>
+<summary>Extract dds files from tex.xbx files.</summary>
+
+```
+Usage:
+
+    ug2-tex2dds [FILE] [OPTION]...
+
+Examples:
+
+        ug2-tex2dds infile.tex.xbx -o outdir
+
+        Extract files to outdir/ in the format infile.[image number].dds .
+
+Options:
+    -h                          Print help text
+    -o DIRECTORY                Output files in DIRECTORY instead of current directory.
+    -f FILENAME                 Overwride output filename.
+    -q                          Suppress some output. Does not include errors
+    -w                          Overwrite existing files.
+    -n                          Don't create dds files, just list the contents of the tex file.
+```
+</details>
+
 ## Status
 Tool|Status
 ---|---
 ug2-pre-unpack|Ready
 ug2-pre-pack|Ready
-ug2-tex2dds|In-Progress
+ug2-tex2dds|Ready
 ug2-dds2tex|
 ug2-img2png|
 ug2-png2img|
