@@ -19,7 +19,8 @@ Example:
 
     ug2-pre-unpack infile.prx -wo data/pre
 
-    Lists the contents of "infile.prx" and extracts them to ./data/pre, overwriting any existing versions of the files.
+    Lists the contents of "infile.prx" and extracts them to ./data/pre, overwriting any existing
+    versions of the files.
 
 Options:
 
@@ -53,7 +54,8 @@ Examples:
     -f file1.qb internal\\path\\file1.qb \
     -f file2.col.xbx other\\internal\\path\\file2.col.xbx
 
-    Manually specify files and their internal paths using the -f switch and write pre file in specific location.
+    Manually specify files and their internal paths using the -f switch and write pre file in
+    specific location.
 
 Options:
 
