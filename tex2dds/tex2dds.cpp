@@ -75,6 +75,13 @@ int main(int argc, char **argv)
         return 0;
     }
 
+    if (options.in_path.empty())
+    {
+        std::cerr << "Error: No input file" << std::endl;
+        std::cerr << "Unpack failed." << std::endl;
+        return -1;
+    }
+    
     in_stream.open(options.in_path);
 
     if (in_stream.fail())
