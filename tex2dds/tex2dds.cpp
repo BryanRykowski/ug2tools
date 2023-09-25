@@ -36,6 +36,7 @@ struct
     std::filesystem::path out_dir;
     bool quiet = false;
     bool write = true;
+    bool overwrite = false;
 } options;
 
 bool ReadArgs(int argc, char **argv);
@@ -134,6 +135,10 @@ bool ReadArgs(int argc, char **argv)
                 else if (c == 'n')
                 {
                     options.write = false;
+                }
+                else if (c == 'w')
+                {
+                    options.overwrite = true;
                 }
                 else if (c == 'o')
                 {
@@ -353,14 +358,23 @@ bool ReadImage(std::ifstream &in_stream, unsigned int index)
 
     if (options.write)
     {
-        std::filesystem::path filename = options.in_path.stem().stem();
-        filename += "." + std::to_string(index) + ".dds";
+        std::filesystem::path out_path;
+
+        out_path = options.out_dir;
+        out_path /= options.in_path.stem().stem();
+        out_path += "." + std::to_string(index) + ".dds";
+
+        if (std::filesystem::exists(out_path) && !options.overwrite)
+        {
+            std::cerr << "Error: file \"" << out_path.string()  << "\" already exists and overwrite not enabled" << std::endl;
+            return true;
+        }
         
-        out_stream.open(options.out_dir / filename, out_stream.binary);
+        out_stream.open(out_path, out_stream.binary);
 
         if (out_stream.fail())
         {
-            std::cerr << "Error: Failed to open output file \"" << std::filesystem::path(options.out_dir / filename).string() << "\"" << std::endl;
+            std::cerr << "Error: Failed to open output file \"" << out_path.string() << "\"" << std::endl;
             return true;
         }
 
