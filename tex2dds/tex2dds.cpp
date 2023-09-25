@@ -141,7 +141,7 @@ void PrintHelp()
     std::cout << "Options:" << std::endl;
     std::cout << "    -h                          Print this help text" << std::endl;
     std::cout << "    -o DIRECTORY                Output files in DIRECTORY instead of current directory." << std::endl;
-    std::cout << "    -f FILENAME                 Overwride output filename." << std::endl;
+    std::cout << "    -f FILENAME                 Override output filename." << std::endl;
     std::cout << "    -q                          Suppress some output. Does not include errors" << std::endl;
     std::cout << "    -w                          Overwrite existing files." << std::endl;
     std::cout << "    -n                          Don't create dds files, just list the contents of the tex file." << std::endl;

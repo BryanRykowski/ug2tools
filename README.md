@@ -90,7 +90,7 @@ Examples:
 Options:
     -h                          Print help text
     -o DIRECTORY                Output files in DIRECTORY instead of current directory.
-    -f FILENAME                 Overwride output filename.
+    -f FILENAME                 Override output filename.
     -q                          Suppress some output. Does not include errors
     -w                          Overwrite existing files.
     -n                          Don't create dds files, just list the contents of the tex file.
