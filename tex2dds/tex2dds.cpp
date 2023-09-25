@@ -38,8 +38,10 @@ struct
     bool quiet = false;
     bool write = true;
     bool overwrite = false;
+    bool printhelp = false;
 } options;
 
+void PrintHelp();
 bool ReadArgs(int argc, char **argv);
 bool ReadFileHeader(std::ifstream &in_stream, TexFileHeader &out_header);
 bool ReadImageHeader(std::ifstream &in_stream, TexImageHeader &out_header);
@@ -57,6 +59,7 @@ int main(int argc, char **argv)
     {
         std::cerr << "Error: No arguments" << std::endl;
         std::cerr << "Unpack failed." << std::endl;
+        PrintHelp();
         return -1;
     }
     
@@ -64,6 +67,12 @@ int main(int argc, char **argv)
     {
         std::cerr << "Unpack failed." << std::endl;
         return -1;
+    }
+
+    if (options.printhelp)
+    {
+        PrintHelp();
+        return 0;
     }
 
     in_stream.open(options.in_path);
@@ -115,6 +124,22 @@ int main(int argc, char **argv)
     return 0;
 }
 
+void PrintHelp()
+{
+    std::cout << "Usage: ug2-tex2dds [FILE] [OPTION]..." << std::endl << std::endl;
+    std::cout << "Extract dds files from tex.xbx files." << std::endl << std::endl;
+    std::cout << "Examples:" << std::endl << std::endl;
+    std::cout << "        ug2-tex2dds infile.tex.xbx -o outdir" << std::endl << std::endl;
+    std::cout << "        Extract files to outdir/ in the format infile.[image number].dds ." << std::endl << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << "    -h                          Print this help text" << std::endl;
+    std::cout << "    -o DIRECTORY                Output files in DIRECTORY instead of current directory." << std::endl;
+    std::cout << "    -f FILENAME                 Overwride output filename." << std::endl;
+    std::cout << "    -q                          Suppress some output. Does not include errors" << std::endl;
+    std::cout << "    -w                          Overwrite existing files." << std::endl;
+    std::cout << "    -n                          Don't create dds files, just list the contents of the tex file." << std::endl;
+}
+
 bool ReadArgs(int argc, char **argv)
 {
     std::string arg;
@@ -141,6 +166,10 @@ bool ReadArgs(int argc, char **argv)
                 else if (c == 'w')
                 {
                     options.overwrite = true;
+                }
+                else if (c == 'h')
+                {
+                    options.printhelp = true;
                 }
                 else if (c == 'o')
                 {
