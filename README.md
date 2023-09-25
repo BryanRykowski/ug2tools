@@ -8,6 +8,7 @@ Useful utilities for THUG 2/THUG Pro.
 
 ### ug2-pre-unpack
 <details>
+<br>
 <summary>Extract files embedded in pre/prx files.</summary>
 
 ```
