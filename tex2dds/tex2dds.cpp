@@ -124,7 +124,7 @@ int main(int argc, char **argv)
     //          number of images    4 bytes
     //
     //      image 0:
-    //          header              20 bytes        Contains a checksum, dimensions, number of levels, and compression type
+    //          header              32 bytes        Contains a checksum, dimensions, number of levels, and compression type
     //          level 0             4 + x bytes     First 4 bytes are the size of the mipmap level
     //          .
     //          .
@@ -132,7 +132,7 @@ int main(int argc, char **argv)
     //      .
     //      .
     //      image n:
-    //          header              20 bytes
+    //          header              32 bytes
     //          level 0             4 + x bytes
     //          .
     //          .
@@ -436,7 +436,10 @@ bool ReadImage(std::ifstream &in_stream, unsigned int index)
     //          width           4 bytes
     //          height          4 bytes
     //          levels          4 bytes
+    //          unknown         4 bytes
+    //          unknown         4 bytes
     //          dxt version     4 bytes
+    //          unknown         4 bytes
     //
     //      level 0:
     //          size            4 bytes
