@@ -456,6 +456,7 @@ bool ReadImage(std::ifstream &in_stream, unsigned int index)
     DdsFileHeader dds_header;
     std::ofstream out_stream;
     unsigned int level_size;
+    bool dxt2 = false;
     
     if (ReadImageHeader(in_stream, i_header)) return true;
 
@@ -465,11 +466,29 @@ bool ReadImage(std::ifstream &in_stream, unsigned int index)
         return true;
     }
 
+    // Some THUG Pro tex.xbx files say they are dxt2 format, but are dxt1.
+    // If that's detected, just change the dxt value to 1.
+    if (i_header.dxt == 2)
+    {
+        unsigned int expected_size = i_header.width * i_header.height;
+        
+        if (i_header.size == expected_size / 2)
+        {
+            dxt2 = true;
+            i_header.dxt = 1;
+        }
+        else if (i_header.size != expected_size)
+        {
+            std::cerr << "Error: " << i_header.width << "x" << i_header.height << " dxt" << i_header.dxt << " image should be " << expected_size << " bytes, but was " << i_header.size << std::endl;
+            return true;
+        }
+    } 
+
     if (!options.quiet)
     {
         std::cout << "0x" << std::hex <<  i_header.checksum << std::dec << " ";
         std::cout << i_header.levels << " ";
-        std::cout << i_header.dxt << " ";
+        std::cout << ( dxt2 ? "2->" : "" ) << i_header.dxt << " ";
         std::cout << i_header.width << "x" << i_header.height << std::endl;
     }
 
