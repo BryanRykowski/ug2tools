@@ -117,6 +117,27 @@ int main(int argc, char **argv)
         std::cout << "index | checksum | mipmap levels | dxt version | dimensions" << std::endl << std::endl;
     }
 
+    // A tex file has the layout:
+    //
+    //      header:
+    //          version?            4 bytes         Always 1
+    //          number of images    4 bytes
+    //
+    //      image 0:
+    //          header              20 bytes        Contains a checksum, dimensions, number of levels, and compression type
+    //          level 0             4 + x bytes     First 4 bytes are the size of the mipmap level
+    //          .
+    //          .
+    //          level n             4 + x bytes
+    //      .
+    //      .
+    //      image n:
+    //          header              20 bytes
+    //          level 0             4 + x bytes
+    //          .
+    //          .
+    //          level n             4 + x bytes
+
     for (unsigned int i = 0; i < header.num_files; ++i)
     {
         int w = (header.num_files > 9) ? 2 : 1;
@@ -391,12 +412,12 @@ void BuildDdsHeader(const TexImageHeader &i_header, DdsFileHeader &dds_header)
     dds_header.depth = 0;
     dds_header.levels = i_header.levels;
     
-    dds_header.pix_fmt.flags = 0x4;
+    dds_header.pix_fmt.flags = 0x4; // Indicate that the fourcc field is present
     dds_header.pix_fmt.fourcc[0] = 'D';
     dds_header.pix_fmt.fourcc[1] = 'X';
     dds_header.pix_fmt.fourcc[2] = 'T';
     dds_header.pix_fmt.fourcc[3] = char_table[i_header.dxt - 1];
-    dds_header.pix_fmt.rgb_bits = 0;
+    dds_header.pix_fmt.rgb_bits = 0; // Leaving the rest of the pixel format as 0 seems to work fine
     dds_header.pix_fmt.r_bitmask = 0;
     dds_header.pix_fmt.g_bitmask = 0;
     dds_header.pix_fmt.b_bitmask = 0;
@@ -408,6 +429,26 @@ void BuildDdsHeader(const TexImageHeader &i_header, DdsFileHeader &dds_header)
 
 bool ReadImage(std::ifstream &in_stream, unsigned int index)
 {
+    // Each image has the layout:
+    //
+    //      header:
+    //          checksum        4 bytes
+    //          width           4 bytes
+    //          height          4 bytes
+    //          levels          4 bytes
+    //          dxt version     4 bytes
+    //
+    //      level 0:
+    //          size            4 bytes
+    //          data            [size] bytes
+    //      .
+    //      .
+    //      .
+    //
+    //      level n:
+    //          size            4 bytes
+    //          data            [size] bytes
+    
     TexImageHeader i_header;
     DdsFileHeader dds_header;
     std::ofstream out_stream;
@@ -431,7 +472,7 @@ bool ReadImage(std::ifstream &in_stream, unsigned int index)
         
         if (options.filename.empty())
         {
-            out_path /= options.in_path.stem().stem();
+            out_path /= options.in_path.stem().stem(); // Remove the .tex.xbx extensions.
         }
         else
         {
