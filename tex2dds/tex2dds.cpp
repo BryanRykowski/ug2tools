@@ -456,6 +456,12 @@ bool ReadImage(std::ifstream &in_stream, unsigned int index)
     
     if (ReadImageHeader(in_stream, i_header)) return true;
 
+    if (i_header.dxt > 5 || i_header.dxt == 0)
+    {
+        std::cerr << "Error: Invalid dxt version (" << i_header.dxt << ") in image " << index << std::endl;
+        return true;
+    }
+
     if (!options.quiet)
     {
         std::cout << "0x" << std::hex <<  i_header.checksum << std::dec << " ";
