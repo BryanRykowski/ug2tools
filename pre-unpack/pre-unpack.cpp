@@ -144,11 +144,15 @@ int main(int argc, char **argv)
             return -1;
         }
 
-        path = std::string(subheader.path.begin(), subheader.path.end());
+        for (char c : subheader.path)
+        {
+            if (c < 32) break; 
+            path.push_back(c);
+        }
 
         if (!globalValues.quiet)
         {
-            std::cout << std::setw(2) << i << std::setw(10) << subheader.inflatedSize << " " << std::setw(10) << subheader.deflatedSize << std::setw(0) << " " << path << std::endl;
+            std::cout << std::setw(3) << i << std::setw(10) << subheader.inflatedSize << " " << std::setw(10) << subheader.deflatedSize << std::setw(0) << " " << path << std::endl;
         }
 
         if (globalValues.unpack)
