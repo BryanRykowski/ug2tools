@@ -84,9 +84,9 @@ Usage:
 
 Examples:
 
-        ug2-tex2dds infile.tex.xbx -o outdir
+    ug2-tex2dds infile.tex.xbx -o outdir
 
-        Extract files to outdir/ in the format infile.[image number].dds .
+    Extract files to outdir/ in the format infile.[image number].dds .
 
 Options:
     -h                          Print help text
