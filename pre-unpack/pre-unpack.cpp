@@ -174,19 +174,21 @@ int main(int argc, char **argv)
 
         if (globalValues.prespec && globalValues.unpack)
         {
-            std::vector<char>::difference_type slash_loc = 0;
-            std::vector<char>::difference_type null_loc = 0;
-
-            for (unsigned int i = 0; i < subheader.path.size(); ++i)
-            {
-                if (subheader.path[i] == '\\') {slash_loc = i + 1;}
-            }
-
-            null_loc = subheader.path.size();
+            unsigned int slash_loc = 0;
+            std::string internal_path;
+            std::string filename;
             
-            for (int i = subheader.path.size() - 1; i >=0; --i)
+            for (unsigned int j = 0; j < subheader.path.size(); ++j)
             {
-                if (subheader.path[i] == 0) {null_loc = i;}
+                char c = subheader.path[j];
+                if (c == '\\') slash_loc = j;
+                if (c < 32) break;
+                internal_path.push_back(c);
+            }
+            
+            for (unsigned int j = slash_loc + 1; j < internal_path.size(); ++j)
+            {
+                filename.push_back(internal_path[j]);
             }
 
             std::filesystem::path filepath;
@@ -197,10 +199,10 @@ int main(int argc, char **argv)
                 filepath /= globalValues.outDir;
             }
 
-            filepath /= std::string(subheader.path.begin() + slash_loc, subheader.path.begin() + null_loc);
+            filepath /= filename;
 
             prespecstream << filepath.string() << std::endl;
-            prespecstream << std::string(subheader.path.begin(), subheader.path.begin() + null_loc) << std::endl << std::endl;
+            prespecstream << internal_path << std::endl << std::endl;
         }
     }
 
