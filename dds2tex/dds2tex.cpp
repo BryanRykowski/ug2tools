@@ -22,17 +22,17 @@ int main(int argc, char **argv)
 	OptionStruct options;
 	std::filesystem::path out_path = "out.tex.xbx";
 	FileList file_list;
-	
+		
 	if (argc < 2)
-    {
-        std::cerr << "Error: No arguments" << std::endl;
-        return -1;
-    }
-	
+	{
+	    std::cerr << "Error: No arguments" << std::endl;
+	    return -1;
+	}
+		
 	if (ReadArgs(argc, argv, out_path, file_list, options)) return -1;
 
 	if (ReadFiles(out_path, file_list, options)) return -1;
-	
+		
 	return 0;
 }
 
@@ -40,34 +40,34 @@ bool ReadArgs(int argc, char **argv, std::filesystem::path &out_path, FileList &
 {
 	std::string arg;
 
-    for (int i = 1; i < argc; ++i)
-    {
+	for (int i = 1; i < argc; ++i)
+	{
 		arg = argv[i];
 
 		if ((arg[0] == '-') && (arg.size() > 1))
-        {
+		{
 			std::string switches = arg.substr(1, arg.size() - 1);
-            bool exclusive_sw = false;
-            
-            for (char c : switches)
-            {
+			bool exclusive_sw = false;
+			
+			for (char c : switches)
+			{
 				if (c == 'f')
 				{
 					if (exclusive_sw)
-                    {
-                        std::cerr << "Error: Mutually exclusive switches combined" << std::endl;
-                        return true;
-                    }
-
-                    exclusive_sw = true;
-
-                    if (i + 1 >= argc)
-                    {
-                        std::cerr << "Error: Wrong number of arguments after -f" << std::endl;
-                        return true;
-                    }
-
-                    ++i;
+					{
+					    std::cerr << "Error: Mutually exclusive switches combined" << std::endl;
+					    return true;
+					}
+					
+					exclusive_sw = true;
+					
+					if (i + 1 >= argc)
+					{
+					    std::cerr << "Error: Wrong number of arguments after -f" << std::endl;
+					    return true;
+					}
+					
+					++i;
 					file_list.push_back(argv[i]);
 				}
 				else if (c == 'n')
@@ -81,7 +81,7 @@ bool ReadArgs(int argc, char **argv, std::filesystem::path &out_path, FileList &
 			out_path = arg;
 		}
 	}
-	
+		
 	return false;
 }
 
@@ -99,7 +99,7 @@ bool WriteTexHeader(std::ofstream &out_stream, unsigned int num_files)
 		std::cerr << "Error: Failed to write tex file header" << std::endl;
 		return true;
 	}
-	
+		
 	return false;
 }
 
@@ -129,19 +129,19 @@ bool ReadDdsHeader(std::ifstream &in_stream, DdsFileHeader &dds_header)
 
 	dds_header.flags = read_u32le(buffer + 8);
 	dds_header.height = read_u32le(buffer + 12);
-    dds_header.width = read_u32le(buffer + 16);
-    dds_header.pitch = read_u32le(buffer + 20);
-    dds_header.depth = read_u32le(buffer + 24);
-    dds_header.levels = read_u32le(buffer + 28);
+	dds_header.width = read_u32le(buffer + 16);
+	dds_header.pitch = read_u32le(buffer + 20);
+	dds_header.depth = read_u32le(buffer + 24);
+	dds_header.levels = read_u32le(buffer + 28);
 	dds_header.pix_fmt.flags = read_u32le(buffer + 80);
 	std::copy(buffer + 84, buffer + 88, dds_header.pix_fmt.fourcc);
 	dds_header.pix_fmt.rgb_bits = read_u32le(buffer + 88);
-    dds_header.pix_fmt.r_bitmask = read_u32le(buffer + 92);
-    dds_header.pix_fmt.g_bitmask = read_u32le(buffer + 96);
-    dds_header.pix_fmt.b_bitmask = read_u32le(buffer + 100);
-    dds_header.pix_fmt.a_bitmask = read_u32le(buffer + 104);
+	dds_header.pix_fmt.r_bitmask = read_u32le(buffer + 92);
+	dds_header.pix_fmt.g_bitmask = read_u32le(buffer + 96);
+	dds_header.pix_fmt.b_bitmask = read_u32le(buffer + 100);
+	dds_header.pix_fmt.a_bitmask = read_u32le(buffer + 104);
 	dds_header.caps = read_u32le(buffer + 108);
-    dds_header.caps2 = read_u32le(buffer + 112);
+	dds_header.caps2 = read_u32le(buffer + 112);
 	
 	return false;
 }
