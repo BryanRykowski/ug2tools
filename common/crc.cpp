@@ -22,7 +22,7 @@
 
 static unsigned int crc_table[] =
 {
-    0x00000000, 0x77073096, 0xee0e612c, 0x990951ba,
+	0x00000000, 0x77073096, 0xee0e612c, 0x990951ba,
 	0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
 	0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,
 	0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91,
@@ -90,13 +90,26 @@ static unsigned int crc_table[] =
 
 unsigned int StringCRC(const std::string &str)
 {
-    unsigned int crc = 0xffffffff;
+	unsigned int crc = 0xffffffff;
 
-    for (char c : str)
-    {
-        unsigned int table_val = crc_table[static_cast<unsigned char>(crc) ^ static_cast<unsigned char>(c)];
-        crc = table_val ^ (crc >> 8);
-    }
+	for (char c : str)
+	{
+		unsigned int table_val = crc_table[static_cast<unsigned char>(crc) ^ static_cast<unsigned char>(c)];
+		crc = table_val ^ (crc >> 8);
+	}
 
-    return crc;
+	return crc;
+}
+
+unsigned int BufferCRC(const char *buffer, unsigned int size)
+{
+	unsigned int crc = 0xffffffff;
+
+	for (unsigned int i = 0; i < size; ++i)
+	{
+		unsigned int table_val = crc_table[static_cast<unsigned char>(crc) ^ static_cast<unsigned char>(buffer[i])];
+		crc = table_val ^ (crc >> 8);
+	}
+
+	return crc;
 }
