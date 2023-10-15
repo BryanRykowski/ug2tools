@@ -25,8 +25,8 @@ int main(int argc, char **argv)
 		
 	if (argc < 2)
 	{
-	    std::cerr << "Error: No arguments" << std::endl;
-	    return -1;
+		std::cerr << "Error: No arguments" << std::endl;
+		return -1;
 	}
 		
 	if (ReadArgs(argc, argv, out_path, file_list, options)) return -1;
@@ -55,18 +55,18 @@ bool ReadArgs(int argc, char **argv, std::filesystem::path &out_path, FileList &
 				{
 					if (exclusive_sw)
 					{
-					    std::cerr << "Error: Mutually exclusive switches combined" << std::endl;
-					    return true;
+						std::cerr << "Error: Mutually exclusive switches combined" << std::endl;
+						return true;
 					}
-					
+
 					exclusive_sw = true;
-					
+
 					if (i + 1 >= argc)
 					{
-					    std::cerr << "Error: Wrong number of arguments after -f" << std::endl;
-					    return true;
+						std::cerr << "Error: Wrong number of arguments after -f" << std::endl;
+						return true;
 					}
-					
+
 					++i;
 					file_list.push_back(argv[i]);
 				}
@@ -146,6 +146,16 @@ bool ReadDdsHeader(std::ifstream &in_stream, DdsFileHeader &dds_header)
 	return false;
 }
 
+bool SkipDdsLevels(std::ifstream &in_stream, const DdsFileHeader &dds_header)
+{
+	for (unsigned int i = 0; i < dds_header.levels; ++i)
+	{
+
+	}
+	
+	return false;
+}
+
 bool ReadFiles(std::filesystem::path &out_path, FileList &file_list, OptionStruct &options)
 {
 	std::ofstream out_stream;
@@ -175,6 +185,8 @@ bool ReadFiles(std::filesystem::path &out_path, FileList &file_list, OptionStruc
 		}
 
 		if (ReadDdsHeader(in_stream, dds_header)) return true;
+
+		if (SkipDdsLevels(in_stream, dds_header)) return true;
 	}
 
 	return false;
