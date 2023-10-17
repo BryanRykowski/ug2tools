@@ -7,7 +7,6 @@
 #include "../common/write_word.hpp"
 #include "../common/read_word.hpp"
 #include "../common/tex_header.hpp"
-#include "../common/crc.hpp"
 
 typedef std::vector<std::filesystem::path> FileList;
 
@@ -155,6 +154,7 @@ bool ReadDdsHeader(std::ifstream &in_stream, DdsFileHeader &dds_header)
 
 bool GetDdsData(std::ifstream &in_stream, std::vector<char> &dds_data, const DdsFileHeader &dds_header)
 {
+	unsigned int buffer_pos = 0;
 	unsigned int total_size = 0;
 	unsigned int level_size = dds_header.pitch;
 
@@ -164,16 +164,27 @@ bool GetDdsData(std::ifstream &in_stream, std::vector<char> &dds_data, const Dds
 		level_size /= 4;
 	}
 
-	dds_data.resize(total_size);
+	dds_data.resize(total_size + (dds_header.levels * 4));
 
-	in_stream.read(dds_data.data(), total_size);
-
-	if (in_stream.fail())
-	{
-		std::cerr << "Error: Failed to read dds pixel data" << std::endl;
-		return true;
-	}
+	level_size = dds_header.pitch;
 	
+	for (unsigned int i = 0; i < dds_header.levels; ++i)
+	{
+		write_u32le(dds_data.data() + buffer_pos, level_size);
+		buffer_pos += 4;
+
+		in_stream.read(dds_data.data() + buffer_pos, level_size);
+		buffer_pos += level_size;
+		
+		if (in_stream.fail())
+		{
+			std::cerr << "Error: Failed to read dds pixel data" << std::endl;
+			return true;
+		}
+		
+		level_size /= 4;
+	}
+
 	return false;
 }
 
@@ -196,39 +207,6 @@ bool WriteImageHeader(std::ofstream &out_stream, TexImageHeader &image_header)
 	{
 		std::cerr << "Error: Failed to write image file header" << std::endl;
 		return true;
-	}
-
-	return false;
-}
-
-bool WriteImageData(std::ofstream &out_stream, std::vector<char> &image_data, DdsFileHeader &dds_header)
-{
-	unsigned int level_size = dds_header.pitch;
-	char level_size_le[4];
-	unsigned int data_pos = 0;
-
-	for (unsigned int i = 0; i < dds_header.levels; ++i)
-	{
-		write_u32le(level_size_le, level_size);
-
-		out_stream.write(level_size_le, 4);
-
-		if (out_stream.fail())
-		{
-			std::cerr << "Error: Failed to write image file data" << std::endl;
-			return true;
-		}
-
-		out_stream.write(&image_data[data_pos], level_size);
-
-		if (out_stream.fail())
-		{
-			std::cerr << "Error: Failed to write image file data" << std::endl;
-			return true;
-		}
-
-		data_pos += level_size;
-		level_size /= 4;
 	}
 
 	return false;
@@ -278,8 +256,7 @@ bool ReadFiles(std::filesystem::path &out_path, FileList &file_list, OptionStruc
 		if (options.write)
 		{
 			if (GetDdsData(in_stream, dds_data, dds_header)) return true;
-			
-			image_header.checksum = BufferCRC(dds_data.data(), dds_data.size());
+
 			image_header.width = dds_header.width;
 			image_header.height = dds_header.height;
 			image_header.levels = dds_header.levels;
@@ -312,7 +289,14 @@ bool ReadFiles(std::filesystem::path &out_path, FileList &file_list, OptionStruc
 			}
 
 			if (WriteImageHeader(out_stream, image_header)) return true;
-			if (WriteImageData(out_stream, dds_data, dds_header)) return true;
+
+			out_stream.write(dds_data.data(), dds_data.size());
+			
+			if (out_stream.fail())
+			{
+				std::cerr << "Error: Failed to write image file data" << std::endl;
+				return true;
+			}
 		}
 	}
 
