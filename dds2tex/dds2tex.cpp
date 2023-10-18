@@ -9,6 +9,7 @@
 #include "../common/tex_header.hpp"
 
 typedef std::vector<std::filesystem::path> FileList;
+typedef std::vector<unsigned int> ChecksumList;
 
 struct OptionStruct
 {
@@ -16,14 +17,17 @@ struct OptionStruct
 	bool quiet = false;
 };
 
-bool ReadArgs(int argc, char **argv, std::filesystem::path &out_path, FileList &file_list, OptionStruct &options);
-bool ReadFiles(std::filesystem::path &out_path, FileList &file_list, OptionStruct &options);
+bool ReadArgs(int argc, char **argv, std::filesystem::path &out_path, std::filesystem::path &checksum_path, FileList &file_list, OptionStruct &options);
+bool ReadChecksums(std::filesystem::path &checksum_path, ChecksumList &checksum_list);
+bool ReadFiles(std::filesystem::path &out_path, FileList &file_list, ChecksumList &checksum_list, OptionStruct &options);
 
 int main(int argc, char **argv)
 {
 	OptionStruct options;
 	std::filesystem::path out_path = "out.tex.xbx";
+	std::filesystem::path checksum_path = "";
 	FileList file_list;
+	ChecksumList checksum_list;
 		
 	if (argc < 2)
 	{
@@ -31,14 +35,24 @@ int main(int argc, char **argv)
 		return -1;
 	}
 		
-	if (ReadArgs(argc, argv, out_path, file_list, options)) return -1;
+	if (ReadArgs(argc, argv, out_path, checksum_path, file_list, options)) return -1;
 
-	if (ReadFiles(out_path, file_list, options)) return -1;
+	if (!checksum_path.empty())
+	{
+		if (ReadChecksums(checksum_path, checksum_list)) return -1;
+
+		if (!options.quiet)
+		{
+			std::cout << "Read " << checksum_list.size() << " checksums from \"" << checksum_path.string() << "\"" << std::endl << std::endl;
+		}
+	}
+
+	if (ReadFiles(out_path, file_list, checksum_list, options)) return -1;
 		
 	return 0;
 }
 
-bool ReadArgs(int argc, char **argv, std::filesystem::path &out_path, FileList &file_list, OptionStruct &options)
+bool ReadArgs(int argc, char **argv, std::filesystem::path &out_path, std::filesystem::path &checksum_path, FileList &file_list, OptionStruct &options)
 {
 	std::string arg;
 
@@ -72,6 +86,25 @@ bool ReadArgs(int argc, char **argv, std::filesystem::path &out_path, FileList &
 					++i;
 					file_list.push_back(argv[i]);
 				}
+				if (c == 'c')
+				{
+					if (exclusive_sw)
+					{
+						std::cerr << "Error: Mutually exclusive switches combined" << std::endl;
+						return true;
+					}
+
+					exclusive_sw = true;
+
+					if (i + 1 >= argc)
+					{
+						std::cerr << "Error: Wrong number of arguments after -f" << std::endl;
+						return true;
+					}
+
+					++i;
+					checksum_path = argv[i];
+				}
 				else if (c == 'n')
 				{
 					options.write = false;
@@ -88,6 +121,72 @@ bool ReadArgs(int argc, char **argv, std::filesystem::path &out_path, FileList &
 		}
 	}
 		
+	return false;
+}
+
+bool ReadChecksums(std::filesystem::path &checksum_path, ChecksumList &checksum_list)
+{
+	unsigned int num_images = 0;
+	char word[4];
+	std::ifstream in_stream(checksum_path, std::ios::binary);
+
+	if (in_stream.fail())
+	{
+		std::cerr << "Error: Failed to read tex file \"" << checksum_path.string() << "\"" << std::endl;
+		return true;
+	}
+
+	in_stream.ignore(4);
+	in_stream.read(word, 4);
+
+	if (in_stream.fail())
+	{
+		std::cerr << "Error: Failed to read tex file header" << std::endl;
+		return true;
+	}
+
+	num_images = read_u32le(word);
+
+	for (unsigned int i = 0; i < num_images; ++i)
+	{
+		unsigned int num_levels;
+		char header[32];
+
+		in_stream.read(header, 32);
+
+		if (in_stream.fail())
+		{
+			std::cerr << "Error: Failed to read tex image header" << std::endl;
+			return true;
+		}
+
+		checksum_list.push_back(read_u32le(header));
+		num_levels = read_u32le(header + 12);
+
+		for (unsigned int j = 0; j < num_levels; ++j)
+		{
+			char level_size[4];
+
+			in_stream.read(level_size, 4);
+
+			if (in_stream.fail())
+			{
+				std::cerr << "Error: Failed to read tex image level size " << j << std::endl;
+				return true;
+			}
+
+			in_stream.ignore(read_u32le(level_size));
+
+			if (in_stream.fail())
+			{
+				std::cerr << "Error: Failed to skip tex image level " << j << std::endl;
+				return true;
+			}
+		}
+	}
+	
+
+
 	return false;
 }
 
@@ -212,10 +311,16 @@ bool WriteImageHeader(std::ofstream &out_stream, TexImageHeader &image_header)
 	return false;
 }
 
-bool ReadFiles(std::filesystem::path &out_path, FileList &file_list, OptionStruct &options)
+bool ReadFiles(std::filesystem::path &out_path, FileList &file_list, ChecksumList &checksum_list, OptionStruct &options)
 {
 	std::ofstream out_stream;
 	std::vector<char> dds_data;
+
+	if ((checksum_list.size() != 0) && (checksum_list.size() != file_list.size()))
+	{
+		std::cerr << "Error: Mismatch between number of checksums and images, " << checksum_list.size() << " checksums and " << file_list.size() << " images" << std::endl;
+		return true;
+	}
 
 	if (options.write)
 	{
@@ -257,6 +362,7 @@ bool ReadFiles(std::filesystem::path &out_path, FileList &file_list, OptionStruc
 		{
 			if (GetDdsData(in_stream, dds_data, dds_header)) return true;
 
+			image_header.checksum = checksum_list.size() ? checksum_list[i] : 0; 
 			image_header.width = dds_header.width;
 			image_header.height = dds_header.height;
 			image_header.levels = dds_header.levels;
