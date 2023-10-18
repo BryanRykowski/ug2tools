@@ -17,15 +17,22 @@ struct OptionStruct
 	bool quiet = false;
 };
 
-bool ReadArgs(int argc, char **argv, std::filesystem::path &out_path, std::filesystem::path &checksum_path, FileList &file_list, OptionStruct &options);
+struct PathStruct
+{
+	std::filesystem::path out_path = "out.tex.xbx";
+	std::filesystem::path checksum_path = "";
+	std::filesystem::path list_path = "";
+};
+
+bool ReadArgs(int argc, char **argv, PathStruct &paths, FileList &file_list, OptionStruct &options);
+bool ReadList(std::filesystem::path &list_path, FileList &file_list);
 bool ReadChecksums(std::filesystem::path &checksum_path, ChecksumList &checksum_list);
 bool ReadFiles(std::filesystem::path &out_path, FileList &file_list, ChecksumList &checksum_list, OptionStruct &options);
 
 int main(int argc, char **argv)
 {
 	OptionStruct options;
-	std::filesystem::path out_path = "out.tex.xbx";
-	std::filesystem::path checksum_path = "";
+	PathStruct paths;
 	FileList file_list;
 	ChecksumList checksum_list;
 		
@@ -35,24 +42,29 @@ int main(int argc, char **argv)
 		return -1;
 	}
 		
-	if (ReadArgs(argc, argv, out_path, checksum_path, file_list, options)) return -1;
+	if (ReadArgs(argc, argv, paths, file_list, options)) return -1;
 
-	if (!checksum_path.empty())
+	if (!paths.list_path.empty())
 	{
-		if (ReadChecksums(checksum_path, checksum_list)) return -1;
+		if (ReadList(paths.list_path, file_list)) return -1;
+	}
+	
+	if (!paths.checksum_path.empty())
+	{
+		if (ReadChecksums(paths.checksum_path, checksum_list)) return -1;
 
 		if (!options.quiet)
 		{
-			std::cout << "Read " << checksum_list.size() << " checksums from \"" << checksum_path.string() << "\"" << std::endl << std::endl;
+			std::cout << "Read " << checksum_list.size() << " checksums from \"" << paths.checksum_path.string() << "\"" << std::endl << std::endl;
 		}
 	}
 
-	if (ReadFiles(out_path, file_list, checksum_list, options)) return -1;
+	if (ReadFiles(paths.out_path, file_list, checksum_list, options)) return -1;
 		
 	return 0;
 }
 
-bool ReadArgs(int argc, char **argv, std::filesystem::path &out_path, std::filesystem::path &checksum_path, FileList &file_list, OptionStruct &options)
+bool ReadArgs(int argc, char **argv, PathStruct &paths, FileList &file_list, OptionStruct &options)
 {
 	std::string arg;
 
@@ -86,7 +98,7 @@ bool ReadArgs(int argc, char **argv, std::filesystem::path &out_path, std::files
 					++i;
 					file_list.push_back(argv[i]);
 				}
-				if (c == 'c')
+				else if (c == 'c')
 				{
 					if (exclusive_sw)
 					{
@@ -103,7 +115,26 @@ bool ReadArgs(int argc, char **argv, std::filesystem::path &out_path, std::files
 					}
 
 					++i;
-					checksum_path = argv[i];
+					paths.checksum_path = argv[i];
+				}
+				else if (c == 'l')
+				{
+					if (exclusive_sw)
+					{
+						std::cerr << "Error: Mutually exclusive switches combined" << std::endl;
+						return true;
+					}
+
+					exclusive_sw = true;
+
+					if (i + 1 >= argc)
+					{
+						std::cerr << "Error: Wrong number of arguments after -f" << std::endl;
+						return true;
+					}
+
+					++i;
+					paths.list_path = argv[i];
 				}
 				else if (c == 'n')
 				{
@@ -117,10 +148,37 @@ bool ReadArgs(int argc, char **argv, std::filesystem::path &out_path, std::files
 		}
 		else
 		{
-			out_path = arg;
+			paths.out_path = arg;
 		}
 	}
 		
+	return false;
+}
+
+bool ReadList(std::filesystem::path &list_path, FileList &file_list)
+{
+	std::ifstream in_stream(list_path);
+	std::string line;
+
+	if (in_stream.fail())
+	{
+		std::cerr << "Error: Failed to read file list \"" << list_path.string() << "\"" << std::endl;
+		return true;
+	}
+
+	while (!in_stream.eof())
+	{
+		std::getline(in_stream, line);
+
+		if (in_stream.fail())
+		{
+			std::cerr << "Error: Failed to read file list \"" << list_path.string() << "\"" << std::endl;
+			return true;
+		}
+
+		file_list.push_back(line);
+	}
+
 	return false;
 }
 
