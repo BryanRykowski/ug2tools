@@ -41,7 +41,7 @@ struct OptionStruct
 
 struct PathStruct
 {
-	std::filesystem::path out_path = "out.tex.xbx";
+	std::filesystem::path out_path = "";
 	std::filesystem::path checksum_path = "";
 	std::filesystem::path list_path = "";
 };
@@ -87,6 +87,12 @@ int main(int argc, char **argv)
 		{
 			std::cout << "Read " << checksum_list.size() << " checksums from \"" << paths.checksum_path.string() << "\"" << std::endl << std::endl;
 		}
+	}
+
+	if (paths.out_path.empty())
+	{
+		std::cerr << "Error: No output file specified" << std::endl;
+		return -1;
 	}
 
 	if (ReadFiles(paths.out_path, file_list, checksum_list, options)) return -1;
