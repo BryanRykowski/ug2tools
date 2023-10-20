@@ -156,7 +156,7 @@ bool ReadArgs(int argc, char **argv, PathStruct &paths, FileList &file_list, Opt
 
 					if (i + 1 >= argc)
 					{
-						std::cerr << "Error: Wrong number of arguments after -f" << std::endl;
+						std::cerr << "Error: Wrong number of arguments after -c" << std::endl;
 						return true;
 					}
 
@@ -175,7 +175,7 @@ bool ReadArgs(int argc, char **argv, PathStruct &paths, FileList &file_list, Opt
 
 					if (i + 1 >= argc)
 					{
-						std::cerr << "Error: Wrong number of arguments after -f" << std::endl;
+						std::cerr << "Error: Wrong number of arguments after -l" << std::endl;
 						return true;
 					}
 
