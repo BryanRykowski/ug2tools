@@ -108,6 +108,7 @@ void PrintHelp()
 	std::cout << "    -n                          Don't create tex.xbx file, just list the input files." << std::endl;
 	std::cout << "    -l FILELIST                 Provide list of input files." << std::endl;
 	std::cout << "    -c TEXFILE                  Provide tex.xbx file to copy checksums from." << std::endl;
+	std::cout << "    -w                          Overwrite existing output file." << std::endl;
 }
 
 bool ReadArgs(int argc, char **argv, PathStruct &paths, FileList &file_list, OptionStruct &options)
