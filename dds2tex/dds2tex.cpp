@@ -35,6 +35,7 @@ struct OptionStruct
 {
 	bool write = true;
 	bool quiet = false;
+	bool print_help = false;
 };
 
 struct PathStruct
@@ -44,6 +45,7 @@ struct PathStruct
 	std::filesystem::path list_path = "";
 };
 
+void PrintHelp();
 bool ReadArgs(int argc, char **argv, PathStruct &paths, FileList &file_list, OptionStruct &options);
 bool ReadList(std::filesystem::path &list_path, FileList &file_list);
 bool ReadChecksums(std::filesystem::path &checksum_path, ChecksumList &checksum_list);
@@ -59,10 +61,17 @@ int main(int argc, char **argv)
 	if (argc < 2)
 	{
 		std::cerr << "Error: No arguments" << std::endl;
+		PrintHelp();
 		return -1;
 	}
 		
 	if (ReadArgs(argc, argv, paths, file_list, options)) return -1;
+
+	if (options.print_help)
+	{
+		PrintHelp();
+		return 0;
+	}
 
 	if (!paths.list_path.empty())
 	{
@@ -82,6 +91,22 @@ int main(int argc, char **argv)
 	if (ReadFiles(paths.out_path, file_list, checksum_list, options)) return -1;
 		
 	return 0;
+}
+
+void PrintHelp()
+{
+	std::cout << "Usage: ug2-dds2tex [OPTION] [OUT FILE]..." << std::endl << std::endl;
+	std::cout << "Pack dds files into a tex.xbx file." << std::endl << std::endl;
+	std::cout << "Examples:" << std::endl << std::endl;
+	std::cout << "        ug2-dds2tex outfile.tex.xbx -l infile.filelist -c infile.tex.xbx" << std::endl << std::endl;
+	std::cout << "        Place files listed in infile.filelist into outfile.tex.xbx and copy over checksums from infile.tex.xbx." << std::endl << std::endl;
+	std::cout << "Options:" << std::endl;
+	std::cout << "    -h                          Print this help text" << std::endl;
+	std::cout << "    -f FILENAME                 Manually specify an input file." << std::endl;
+	std::cout << "    -q                          Suppress some output. Does not include errors" << std::endl;
+	std::cout << "    -n                          Don't create tex.xbx file, just list the input files." << std::endl;
+	std::cout << "    -l FILELIST                 Provide list of input files." << std::endl;
+	std::cout << "    -c TEXFILE                  Provide tex.xbx file to copy checksums from." << std::endl;
 }
 
 bool ReadArgs(int argc, char **argv, PathStruct &paths, FileList &file_list, OptionStruct &options)
@@ -163,6 +188,10 @@ bool ReadArgs(int argc, char **argv, PathStruct &paths, FileList &file_list, Opt
 				else if (c == 'q')
 				{
 					options.quiet = true;
+				}
+				else if (c == 'h')
+				{
+					options.print_help = true;
 				}
 			}
 		}
