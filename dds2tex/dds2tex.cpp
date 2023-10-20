@@ -36,6 +36,7 @@ struct OptionStruct
 	bool write = true;
 	bool quiet = false;
 	bool print_help = false;
+	bool overwrite = false;
 };
 
 struct PathStruct
@@ -192,6 +193,10 @@ bool ReadArgs(int argc, char **argv, PathStruct &paths, FileList &file_list, Opt
 				else if (c == 'h')
 				{
 					options.print_help = true;
+				}
+				else if (c == 'w')
+				{
+					options.overwrite = true;
 				}
 			}
 		}
@@ -431,6 +436,12 @@ bool ReadFiles(std::filesystem::path &out_path, FileList &file_list, ChecksumLis
 
 	if (options.write)
 	{
+		if (std::filesystem::exists(out_path) && !options.overwrite)
+		{
+			std::cerr << "Error: File \"" << out_path.string() << "\" already exists and overwrite not enabled" << std::endl;
+			return true;
+		}
+		
 		out_stream.open(out_path, std::ios::binary);
 
 		if (out_stream.fail())
