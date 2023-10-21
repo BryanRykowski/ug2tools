@@ -23,3 +23,4 @@
 #include <string>
 
 unsigned int StringCRC(const std::string &str);
+unsigned int BufferCRC(const char *buffer, unsigned int size);

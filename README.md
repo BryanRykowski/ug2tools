@@ -100,13 +100,38 @@ Options:
 ```
 </details>
 
+### ug2-dds2tex
+<details>
+<br>
+<summary>Pack dds files into a tex.xbx file.</summary>
+
+```
+Usage: ug2-dds2tex [OPTION] [OUT FILE]...
+
+Examples:
+
+        ug2-dds2tex outfile.tex.xbx -l infile.filelist -c infile.tex.xbx
+
+        Place files listed in infile.filelist into outfile.tex.xbx and copy over checksums from infile.tex.xbx.
+
+Options:
+    -h                          Print this help text
+    -f FILENAME                 Manually specify an input file.
+    -q                          Suppress some output. Does not include errors
+    -n                          Don't create tex.xbx file, just list the input files.
+    -l FILELIST                 Provide list of input files.
+    -c TEXFILE                  Provide tex.xbx file to copy checksums from.
+    -w                          Overwrite existing output file.
+```
+</details>
+
 ## Status
 Tool|Status
 ---|---
 ug2-pre-unpack|Ready
 ug2-pre-pack|Ready
 ug2-tex2dds|Ready
-ug2-dds2tex|
+ug2-dds2tex|Ready
 ug2-img2png|
 ug2-png2img|
 ug2-mdl2obj|
