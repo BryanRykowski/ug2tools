@@ -333,6 +333,12 @@ bool ReadDdsHeader(std::ifstream &in_stream, DdsFileHeader &dds_header)
 
 	in_stream.read(buffer, 128);
 
+	if (in_stream.fail())
+	{
+		std::cerr << "Error: Failed to read dds file header" << std::endl;
+		return true;
+	}
+
 	if (!(buffer[0] == 'D') || !(buffer[1] == 'D') || !(buffer[2] == 'S') || !(buffer[3] = ' '))
 	{
 		std::cerr << "Error: DDS file doesn't begin with \"DDS \"" << std::endl;
