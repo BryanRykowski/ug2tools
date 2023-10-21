@@ -494,6 +494,18 @@ bool ReadFiles(std::filesystem::path &out_path, FileList &file_list, ChecksumLis
 			std::cout << "mipmap levels: " << dds_header.levels << std::endl << std::endl;
 		}
 
+		if (!(dds_header.flags & 0xa1007))
+		{
+			std::cerr << "Error: DDS file flags incorrect" << std::endl;
+			return true;
+		}
+
+		if (!(dds_header.flags & 0x4))
+		{
+			std::cerr << "Error: DDS file pixel format flags incorrect" << std::endl;
+			return true;
+		}
+
 		if (options.write)
 		{
 			if (GetDdsData(in_stream, dds_data, dds_header)) return true;
