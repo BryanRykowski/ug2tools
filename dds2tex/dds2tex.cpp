@@ -376,14 +376,19 @@ bool GetDdsData(std::ifstream &in_stream, std::vector<char> &dds_data, const Dds
 	unsigned int total_size = 0;
 	unsigned int level_size = dds_header.pitch;
 
+	// Calculate total size of image data assuming each level is 1/4 the size of the previous one.
 	for (unsigned int i = 0; i < dds_header.levels; ++i)
 	{
 		total_size += level_size;
 		level_size /= 4;
 	}
 
+	// Prepare the vector to receive the image data.
+	// An image in a TEX file differs from a DDS image in that each level is preceded by its size.
+	// In a DDS image, only the number of levels and the size of the first level are known.
 	dds_data.resize(total_size + (dds_header.levels * 4));
 
+	// In a compressed (DXTx/BCx) DDS file, the pitch indicates the size of the first level.
 	level_size = dds_header.pitch;
 	
 	for (unsigned int i = 0; i < dds_header.levels; ++i)
@@ -417,7 +422,7 @@ bool WriteImageHeader(std::ofstream &out_stream, TexImageHeader &image_header)
 	write_u32le(buffer + 16, 32); // Don't know what these are. Often 32.
 	write_u32le(buffer + 20, 32);
 	write_u32le(buffer + 24, image_header.dxt);
-	write_u32le(buffer + 28, 0);
+	write_u32le(buffer + 28, 0); // Don't know what this is. Usually 0.
 
 	out_stream.write(buffer, 32);
 
@@ -487,11 +492,13 @@ bool ReadFiles(std::filesystem::path &out_path, FileList &file_list, ChecksumLis
 		{
 			if (GetDdsData(in_stream, dds_data, dds_header)) return true;
 
+			// If we were provided with a file to copy checksums from, use one of those. Otherwise, just use 0.
 			image_header.checksum = checksum_list.size() ? checksum_list[i] : 0; 
 			image_header.width = dds_header.width;
 			image_header.height = dds_header.height;
 			image_header.levels = dds_header.levels;
 
+			// Copy over the DXT compression scheme used, or error out.
 			switch (dds_header.pix_fmt.fourcc[3])
 			{
 				case '1':
