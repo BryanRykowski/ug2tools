@@ -95,6 +95,8 @@ Options:
     -q                          Suppress some output. Does not include errors
     -w                          Overwrite existing files.
     -n                          Don't create dds files, just list the contents of the tex file.
+    -l                          Disable generation of filelist.
+    -L                          Use relative paths in filelist.
 ```
 </details>
 
