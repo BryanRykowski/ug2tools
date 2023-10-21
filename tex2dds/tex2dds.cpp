@@ -39,6 +39,8 @@ struct
     bool write = true;
     bool overwrite = false;
     bool printhelp = false;
+    bool filelist = true;
+    bool filelist_fullpath = true;
 } options;
 
 void PrintHelp();
@@ -48,11 +50,12 @@ bool ReadImageHeader(std::ifstream &in_stream, TexImageHeader &out_header);
 bool ReadImageLevelSize(std::ifstream &in_stream, uint32_t &out_size);
 bool SkipImageLevel(std::ifstream &in_stream, unsigned int size);
 bool ReadImageLevel(std::ifstream &in_stream, std::ofstream &out_stream, unsigned int size);
-bool ReadImage(std::ifstream &in_stream, unsigned int index);
+bool ReadImage(std::ifstream &in_stream, unsigned int index, std::ofstream &filelist_stream);
 
 int main(int argc, char **argv)
 {
     std::ifstream in_stream;
+    std::ofstream filelist_stream;
     TexFileHeader header;
 
     if (argc < 2)
@@ -115,13 +118,36 @@ int main(int argc, char **argv)
         std::cout << "index | checksum | mipmap levels | dxt version | dimensions" << std::endl << std::endl;
     }
 
+    if (options.filelist)
+    {
+        std::filesystem::path filelist_path = options.out_dir;
+        filelist_path /= options.in_path.filename();
+        filelist_path += ".filelist";
+        
+        if (std::filesystem::exists(filelist_path) && !options.overwrite)
+        {
+            std::cerr << "Error: Filelist \"" << filelist_path << "\" already exists and overwrite not enabled" << std::endl;
+            std::cerr << "Unpack failed." << std::endl;
+            return -1;
+        }
+        
+        filelist_stream.open(filelist_path);
+
+        if (filelist_stream.fail())
+        {
+            std::cerr << "Error: Failed to create filelist" << std::endl;
+            std::cerr << "Unpack failed." << std::endl;
+            return -1;
+        }
+    }
+
     for (unsigned int i = 0; i < header.num_files; ++i)
     {
         int w = (header.num_files > 9) ? 2 : 1;
 
         if (!options.quiet) std::cout << std::setw(w) << std::left <<  i << std::setw(0) << " ";
         
-        if (ReadImage(in_stream, i))
+        if (ReadImage(in_stream, i, filelist_stream))
         {
             std::cerr << "Unpack failed." << std::endl;
             return -1;
@@ -145,6 +171,8 @@ void PrintHelp()
     std::cout << "    -q                          Suppress some output. Does not include errors" << std::endl;
     std::cout << "    -w                          Overwrite existing files." << std::endl;
     std::cout << "    -n                          Don't create dds files, just list the contents of the tex file." << std::endl;
+    std::cout << "    -l                          Disable generation of filelist." << std::endl;
+    std::cout << "    -L                          Use relative paths in filelist." << std::endl;
 }
 
 bool ReadArgs(int argc, char **argv)
@@ -177,6 +205,14 @@ bool ReadArgs(int argc, char **argv)
                 else if (c == 'h')
                 {
                     options.printhelp = true;
+                }
+                else if (c == 'l')
+                {
+                    options.filelist = false;
+                }
+                else if (c =='L')
+                {
+                    options.filelist_fullpath = false;
                 }
                 else if (c == 'o')
                 {
@@ -404,7 +440,7 @@ void BuildDdsHeader(const TexImageHeader &i_header, DdsFileHeader &dds_header)
     dds_header.caps2 = 0; // Cubemap capabilities, not used.
 }
 
-bool ReadImage(std::ifstream &in_stream, unsigned int index)
+bool ReadImage(std::ifstream &in_stream, unsigned int index, std::ofstream &filelist_stream)
 {
     TexImageHeader i_header;
     DdsFileHeader dds_header;
@@ -461,6 +497,18 @@ bool ReadImage(std::ifstream &in_stream, unsigned int index)
         {
             if (ReadImageLevelSize(in_stream, level_size)) return true;
             if (ReadImageLevel(in_stream, out_stream, level_size)) return true;
+        }
+
+        if (options.filelist)
+        {
+            std::filesystem::path file_path = (options.filelist_fullpath ? std::filesystem::absolute(out_path) : out_path);
+            filelist_stream << file_path.string() << std::endl;
+
+            if (filelist_stream.fail())
+            {
+                std::cerr << "Error: Failed to write to filelist" << std::endl;
+                return true;
+            }
         }
     }
     else
