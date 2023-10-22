@@ -44,6 +44,7 @@ if (UG2TOOLS_PACKAGE_RPM)
     set (CPACK_RPM_COMPRESSION_TYPE "gzip")
     # Why do I have to select the default. It should be the DEFAULT.
     set (CPACK_RPM_FILE_NAME RPM-DEFAULT)
+    set (CPACK_RPM_CHANGELOG_FILE ${CMAKE_SOURCE_DIR}/CHANGELOG)
 
     include(CPack)
 endif()
