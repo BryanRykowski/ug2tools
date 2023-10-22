@@ -1,0 +1,9 @@
+* Sun Oct 22 2023 Bryan Rykowski <90996715+BryanRykowski@users.noreply.github.com> - 0.2.0-1
+- Application: ug2-tex2dds
+- Application: ug2-dds2tex
+- Bugfix: ug2-pre-unpack now correctly displays internal paths in terminal output
+
+* Wed Sep 20 2023 Bryan Rykowski <90996715+BryanRykowski@users.noreply.github.com> - 0.1.0-1
+- First package
+- Application: ug2-pre-unpack
+- Application: ug2-pre-pack 
