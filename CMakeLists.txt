@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.18.4)
-project (ug2tools VERSION 0.1.0)
+project (ug2tools VERSION 0.2.0)
 set (UG2TOOLS_PACKAGE_RELEASE_NUM 1)
 
 option (UG2TOOLS_PACKAGE_RPM "Generate a x86_64 rpm using cpack." OFF)
