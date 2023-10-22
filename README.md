@@ -112,7 +112,8 @@ Examples:
 
         ug2-dds2tex outfile.tex.xbx -l infile.filelist -c infile.tex.xbx
 
-        Place files listed in infile.filelist into outfile.tex.xbx and copy over checksums from infile.tex.xbx.
+        Place files listed in infile.filelist into outfile.tex.xbx and copy over checksums
+        from infile.tex.xbx.
 
 Options:
     -h                          Print this help text
