@@ -1,3 +1,4 @@
-add_executable (ug2-pre-pack pre-pack.cpp ../common/pre_header.hpp ../common/subfile_header.hpp ../common/crc.hpp ../common/crc.cpp ../common/write_word.hpp ../common/write_word.cpp)
+add_executable (ug2-pre-pack pre-pack.cpp ../common/pre_header.hpp ../common/subfile_header.hpp ../libug2/crc.hpp ../libug2/write_word.hpp)
 set_property (TARGET ug2-pre-pack PROPERTY CXX_STANDARD 17)
+target_link_libraries(ug2-pre-pack libug2)
 install(TARGETS ug2-pre-pack DESTINATION bin)
