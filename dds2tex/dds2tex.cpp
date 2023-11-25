@@ -24,8 +24,8 @@
 #include <iostream>
 #include <fstream>
 #include "../common/dds_header.hpp"
-#include "../common/write_word.hpp"
-#include "../common/read_word.hpp"
+#include "../libug2/write_word.hpp"
+#include "../libug2/read_word.hpp"
 #include "../common/tex_header.hpp"
 
 typedef std::vector<std::filesystem::path> FileList;

@@ -20,7 +20,7 @@
 
 #include "../common/pre_header.hpp"
 #include "../common/subfile_header.hpp"
-#include "../common/read_word.hpp"
+#include "../libug2/read_word.hpp"
 #include <fstream>
 #include <iostream>
 #include <iomanip>

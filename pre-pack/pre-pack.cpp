@@ -25,8 +25,8 @@
 #include <fstream>
 #include "../common/pre_header.hpp"
 #include "../common/subfile_header.hpp"
-#include "../common/crc.hpp"
-#include "../common/write_word.hpp"
+#include "../libug2/crc.hpp"
+#include "../libug2/write_word.hpp"
 
 struct FilePair
 {

@@ -18,18 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "../common/write_word.hpp"
+#include "read_word.hpp"
 
-void write_u16le(char *out_data, uint16_t in_word)
+uint16_t read_u16le(const char *in_data)
 {
-    out_data[0] = static_cast<unsigned char>(in_word);
-    out_data[1] = static_cast<unsigned char>(in_word >> 8);
+    uint16_t out_word = 0;
+    
+    out_word = static_cast<unsigned char>(in_data[0]);
+    out_word |= static_cast<unsigned char>(in_data[1]) << 8;
+    
+    return out_word;
 }
 
-void write_u32le(char *out_data, uint32_t in_word)
+uint32_t read_u32le(const char *in_data)
 {
-    out_data[0] = static_cast<unsigned char>(in_word);
-    out_data[1] = static_cast<unsigned char>(in_word >> 8);
-    out_data[2] = static_cast<unsigned char>(in_word >> 16);
-    out_data[3] = static_cast<unsigned char>(in_word >> 24);
+    uint32_t out_word;
+
+    out_word = static_cast<unsigned char>(in_data[0]);
+    out_word |= static_cast<unsigned char>(in_data[1]) << 8;
+    out_word |= static_cast<unsigned char>(in_data[2]) << 16;
+    out_word |= static_cast<unsigned char>(in_data[3]) << 24;
+    
+    return out_word;
 }

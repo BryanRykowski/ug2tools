@@ -25,8 +25,8 @@
 #include <iomanip>
 #include <memory>
 #include <algorithm>
-#include "../common/read_word.hpp"
-#include "../common/write_word.hpp"
+#include "../libug2/read_word.hpp"
+#include "../libug2/write_word.hpp"
 #include "../common/dds_header.hpp"
 #include "../common/tex_header.hpp"
 

@@ -14,6 +14,8 @@ if (MSVC)
     add_compile_options (-Wall -Wextra)
     endif ()
     
+add_subdirectory(libug2)
+
 if (UG2TOOLS_BUILD_PRE_UNPACK)
     add_subdirectory (pre-unpack)
 endif ()
