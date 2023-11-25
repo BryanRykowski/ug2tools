@@ -139,8 +139,8 @@ int main(int argc, char **argv)
 
         if (ReadSubFileHeader(instream, subheader))
         {
-            std::cerr << "Error: Failed to read sub file header " << i << std::endl;
-            std::cerr << "Unpacking failed." << std::endl;
+            std::cerr << "Error: Failed to read sub file header " << i << "\n";
+            std::cerr << "Unpacking failed.\n" << std::flush;
             return -1;
         }
 
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 
         if (!globalValues.quiet)
         {
-            std::cout << std::setw(3) << i << std::setw(10) << subheader.inflatedSize << " " << std::setw(10) << subheader.deflatedSize << std::setw(0) << " " << path << std::endl;
+            std::cout << std::setw(3) << i << std::setw(10) << subheader.inflatedSize << " " << std::setw(10) << subheader.deflatedSize << std::setw(0) << " " << path << "\n";
         }
 
         if (globalValues.unpack)
@@ -216,20 +216,20 @@ int main(int argc, char **argv)
 
 void PrintHelp()
 {
-    std::cout << "Usage: ug2-pre-unpack [FILE] [OPTION]..." << std::endl << std::endl;
-    std::cout << "Extract files embedded in pre/prx files." << std::endl << std::endl;
-    std::cout << "Example:" << std::endl << std::endl;
-    std::cout << "        ug2-pre-unpack infile.prx -wo data/pre" << std::endl << std::endl;
-    std::cout << "        Lists the contents of \"infile.prx\" and extracts them to" << std::endl;
-    std::cout << "        ./data/pre, overwriting any existing versions of the files." << std::endl << std::endl;
-    std::cout << "Options:" << std::endl;
-    std::cout << "    -h              Print this help text" << std::endl;
-    std::cout << "    -o DIRECTORY    Place files in DIRECTORY instead of current directory" << std::endl;
-    std::cout << "    -q              Suppress some output. Does not include errors" << std::endl;
-    std::cout << "    -w              Overwrite existing files" << std::endl;
-    std::cout << "    -p              Disable prespec file generation." << std::endl;
-    std::cout << "    -P              Disable absolute paths in prespec file." << std::endl;
-    std::cout << "    -n              Don't extract files or generate prespec." << std::endl;
+    std::cout << "Usage: ug2-pre-unpack [FILE] [OPTION]...\n\n";
+    std::cout << "Extract files embedded in pre/prx files.\n\n";
+    std::cout << "Example:\n\n";
+    std::cout << "        ug2-pre-unpack infile.prx -wo data/pre\n\n";
+    std::cout << "        Lists the contents of \"infile.prx\" and extracts them to\n\n";
+    std::cout << "        ./data/pre, overwriting any existing versions of the files.\n\n";
+    std::cout << "Options:\n";
+    std::cout << "    -h              Print this help text\n";
+    std::cout << "    -o DIRECTORY    Place files in DIRECTORY instead of current directory\n";
+    std::cout << "    -q              Suppress some output. Does not include errors\n";
+    std::cout << "    -w              Overwrite existing files\n";
+    std::cout << "    -p              Disable prespec file generation.\n";
+    std::cout << "    -P              Disable absolute paths in prespec file.\n";
+    std::cout << "    -n              Don't extract files or generate prespec.\n" << std::flush;
 }
 
 bool ReadArgs(int argc, char **argv)
