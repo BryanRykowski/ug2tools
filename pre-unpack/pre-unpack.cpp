@@ -201,8 +201,8 @@ int main(int argc, char **argv)
 
             filepath /= filename;
 
-            prespecstream << filepath.string() << std::endl;
-            prespecstream << internal_path << std::endl << std::endl;
+            prespecstream << filepath.string() << "\n";
+            prespecstream << internal_path << "\n\n";
         }
     }
 
