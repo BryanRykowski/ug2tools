@@ -3,7 +3,7 @@ project (ug2tools VERSION 0.2.0)
 set (UG2TOOLS_PACKAGE_RELEASE_NUM 1)
 
 option (UG2TOOLS_PACKAGE_RPM "Generate a x86_64 rpm using cpack." OFF)
-option (UG2TOOLS_BUILD_PRE_UNPACK "Build the pre-unpack executable." ON)
+option (UG2TOOLS_BUILD_UNPACK "Build the unpack executable." ON)
 option (UG2TOOLS_BUILD_PRE_PACK "Build the pre-pack executable." ON)
 option (UG2TOOLS_BUILD_TEX2DDS "Build the tex2dds executable." ON)
 option (UG2TOOLS_BUILD_DDS2TEX "Build the dds2tex executable." ON)
@@ -16,8 +16,8 @@ endif ()
 
 add_subdirectory(libug2)
 
-if (UG2TOOLS_BUILD_PRE_UNPACK)
-	add_subdirectory (pre-unpack)
+if (UG2TOOLS_BUILD_UNPACK)
+	add_subdirectory (unpack)
 endif ()
 
 if (UG2TOOLS_BUILD_PRE_PACK)
