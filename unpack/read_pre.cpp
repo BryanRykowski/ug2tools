@@ -20,8 +20,11 @@
 
 #include "unpack.hpp"
 #include "../libug2/read_word.hpp"
+#include "../common/pre_header.hpp"
 #include "../common/subfile_header.hpp"
+#include <cstdio>
 #include <vector>
+#include <fstream>
 
 static bool ReadHeader(std::ifstream& in_stream, PreHeader& header)
 {
@@ -90,6 +93,8 @@ bool Unpack::ReadPre(const std::filesystem::path in_file, Unpack::PreFile& pre)
 		std::fprintf(stderr, "ERROR: Failed to open file \"%s\"\n", in_file.string().c_str());
 		return true;
 	}
+	
+	pre.in_file = in_file;
 
 	PreHeader header;
 	if (ReadHeader(stream, header)) {return true;}

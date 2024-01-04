@@ -22,7 +22,6 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
-#include <fstream>
 
 constexpr const char* help_str =
 	"Usage: ug2-pre-unpack [FILE] [OPTION]...\n\n"
@@ -47,7 +46,7 @@ bool Unpack::GetConfig(int argc, char** argv, Unpack::Config& config)
 	
 	if (argc < 2) {return false;}
 
-	for (unsigned int i = 1; i < argc; ++i)
+	for (int i = 1; i < argc; ++i)
 	{
 		arg = argv[i];
 
@@ -131,16 +130,8 @@ static void ListInfo(const Unpack::PreFile& pre)
 
 static bool WriteSpec(const Unpack::Config& config, const Unpack::PreFile& pre)
 {
-	return false;
-}
-
-static bool CopyFile(std::ifstream& in_stream, std::ofstream& out_stream, const Unpack::EmbeddedFile& file)
-{
-	return false;
-}
-
-static bool WriteFiles(const Unpack::PreFile& pre, bool overwrite)
-{
+	(void)config;
+	(void)pre;
 	return false;
 }
 
@@ -177,6 +168,7 @@ bool Unpack::Unpack(const Unpack::Config& config)
 	}
 
 	if (WriteSpec(config, pre)) {return true;}
+	if (Unpack::WriteFiles(config, pre)) {return true;}
 
 	return false;
 }
