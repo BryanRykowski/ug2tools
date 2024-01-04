@@ -94,16 +94,8 @@ static bool PathGetFileName(const std::vector<char>& path, std::string& file_nam
 	return false;
 }
 
-bool Unpack::WriteFiles(const Unpack::Config& config, const Unpack::PreFile& pre)
+bool Unpack::WriteFiles(const Unpack::Config& config, Unpack::PreFile& pre)
 {
-	std::ifstream in_stream(pre.in_file, std::ios::binary);
-
-	if (!in_stream.good())
-	{
-		std::fprintf(stderr, "ERROR: Failed to open file \"%s\"\n", pre.in_file.c_str());
-		return true;
-	}
-
 	for (const EmbeddedFile& file : pre.files)
 	{
 		std::string file_name;
@@ -121,7 +113,7 @@ bool Unpack::WriteFiles(const Unpack::Config& config, const Unpack::PreFile& pre
 
 		if (file.lzss_size == 0)
 		{
-			CopyFile(in_stream, out_stream, file);
+			CopyFile(pre.in_stream, out_stream, file);
 		}
 		else
 		{

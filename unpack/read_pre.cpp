@@ -58,8 +58,8 @@ static bool ReadSubFile(std::ifstream& in_stream, Unpack::EmbeddedFile& embedded
 
 	embedded_file.raw_size = read_u32le(&buffer[0]);
 	embedded_file.lzss_size = read_u32le(&buffer[4]);
-	unsigned int skip_length = embedded_file.lzss_size ? embedded_file.lzss_size : embedded_file.raw_size;
-	unsigned int remain = skip_length % 4;
+	unsigned int skip_length = embedded_file.lzss_size ? embedded_file.lzss_size : embedded_file.raw_size; // Uncompressed files have lzss = 0
+	unsigned int remain = skip_length % 4; // Everything in a pre file is 4 byte aligned
 	skip_length += remain ? (4 - remain) : 0;
 	unsigned int path_length = read_u32le(&buffer[8]);
 	embedded_file.crc = read_u32le(&buffer[12]);
@@ -85,26 +85,25 @@ bool Unpack::ReadPre(const std::filesystem::path in_file, Unpack::PreFile& pre)
 		std::fprintf(stderr, "ERROR: \"%s\" is a directory\n", in_file.string().c_str());
 		return true;
 	}
-	
-	std::ifstream stream(in_file, std::ios::binary);
 
-	if (!stream.good())
+	pre.in_stream.open(in_file, std::ios::binary);
+	
+	if (!pre.in_stream.good())
 	{
 		std::fprintf(stderr, "ERROR: Failed to open file \"%s\"\n", in_file.string().c_str());
 		return true;
 	}
 	
-	pre.in_file = in_file;
 
 	PreHeader header;
-	if (ReadHeader(stream, header)) {return true;}
+	if (ReadHeader(pre.in_stream, header)) {return true;}
 	pre.size = header.size;
 
 	SubFileHeader subheader;
 	for (unsigned int i = 0; i < header.numFiles; ++i)
 	{
 		EmbeddedFile embedded_file;
-		if (ReadSubFile(stream, embedded_file)) {return true;}
+		if (ReadSubFile(pre.in_stream, embedded_file)) {return true;}
 		pre.files.push_back(embedded_file);
 	}
 	
