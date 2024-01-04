@@ -21,6 +21,7 @@
 #pragma once
 #include <filesystem>
 #include <cstdint>
+#include <fstream>
 #include <vector>
 
 namespace Unpack
@@ -51,7 +52,7 @@ namespace Unpack
 
 	struct PreFile
 	{
-		std::filesystem::path in_file;
+		std::ifstream in_stream;
 		std::vector<Unpack::EmbeddedFile> files;
 		uint32_t size;
 	};
@@ -61,5 +62,5 @@ namespace Unpack
 	void PrintVersion();
 	bool Unpack(const Unpack::Config& config);
 	bool ReadPre(const std::filesystem::path in_file, Unpack::PreFile& pre);
-	bool WriteFiles(const Unpack::Config& config, const Unpack::PreFile& pre);
+	bool WriteFiles(const Unpack::Config& config, Unpack::PreFile& pre);
 }
