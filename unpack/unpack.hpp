@@ -20,10 +20,8 @@
 
 #pragma once
 #include <filesystem>
-#include <fstream>
 #include <cstdint>
 #include <vector>
-#include "../common/pre_header.hpp"
 
 namespace Unpack
 {
@@ -63,4 +61,5 @@ namespace Unpack
 	void PrintVersion();
 	bool Unpack(const Unpack::Config& config);
 	bool ReadPre(const std::filesystem::path in_file, Unpack::PreFile& pre);
+	bool WriteFiles(const Unpack::Config& config, const Unpack::PreFile& pre);
 }
