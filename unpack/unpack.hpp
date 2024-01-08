@@ -63,4 +63,5 @@ namespace Unpack
 	bool Unpack(const Unpack::Config& config);
 	bool ReadPre(const std::filesystem::path in_file, Unpack::PreFile& pre);
 	bool WriteFiles(const Unpack::Config& config, Unpack::PreFile& pre);
+	bool InflateFile(std::ifstream& in_stream, std::ofstream& out_stream, const Unpack::EmbeddedFile& file);
 }

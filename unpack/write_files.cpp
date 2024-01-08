@@ -117,7 +117,7 @@ bool Unpack::WriteFiles(const Unpack::Config& config, Unpack::PreFile& pre)
 		}
 		else
 		{
-			//InflateFile(in_stream, out_stream, file);
+			InflateFile(pre.in_stream, out_stream, file);
 		}  
 	}
 
