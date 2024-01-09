@@ -78,6 +78,8 @@ bool Unpack::WriteFiles(const Unpack::Config& config, Unpack::PreFile& pre)
 	unsigned int largest_lzss = 0;
 	unsigned int largest_raw = 0;
 
+	// Make the buffers big enough for the largest file.
+
 	for (const EmbeddedFile& file : pre.files)
 	{
 		if (file.lzss_size > largest_lzss) {largest_lzss = file.lzss_size;}
@@ -101,6 +103,8 @@ bool Unpack::WriteFiles(const Unpack::Config& config, Unpack::PreFile& pre)
 		}
 
 		std::ofstream out_stream(out_path, std::ios::binary);
+
+		// A lzss of 0 indicates an uncompressed file that can just be copied.
 
 		if (file.lzss_size == 0)
 		{
