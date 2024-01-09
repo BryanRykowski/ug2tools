@@ -97,17 +97,19 @@ bool Unpack::InflateFile(std::ifstream& in_stream, std::ofstream& out_stream, co
 	{
 		type_byte = in_buffer[vars.in_buffer_pos];
 		++vars.in_buffer_pos;
-		int count = std::min((int)(file.lzss_size - vars.in_buffer_pos) - 1, 8);
+		if (vars.in_buffer_pos >= file.lzss_size) {break;}
 
-		for (int i = 0; i < count; ++i)
+		for (int i = 0; i < 8; ++i)
 		{
 			if ((type_byte >> i) & 0x1)
 			{
 				CopyByte(vars);
+				if (vars.in_buffer_pos >= file.lzss_size) {break;}
 			}
 			else
 			{
 				ProcessDict(vars);
+				if (vars.in_buffer_pos >= file.lzss_size) {break;}
 			}
 		}
 	}
