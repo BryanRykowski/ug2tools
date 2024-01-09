@@ -28,11 +28,14 @@ struct InflateVars
 {
 	unsigned int in_buffer_pos = 0;
 	unsigned int out_buffer_pos = 0;
-	unsigned int ring_buffer_pos = 4078;
+	unsigned int ring_buffer_pos = 4078; // In THUG2/THUGPRO pre files, the ring buffer starts at 4078 for some reason.
 };
 
 static void CopyByte(InflateVars& vars)
 {
+	// Just copy a literal byte from input to output. Every byte written to the output must also
+	// be written to the ring buffer, so it is available for future dict entries.
+
 	ring_buffer[vars.ring_buffer_pos] = Unpack::in_buffer[vars.in_buffer_pos];
 	Unpack::out_buffer[vars.out_buffer_pos] = Unpack::in_buffer[vars.in_buffer_pos];
 	++vars.in_buffer_pos;
@@ -42,6 +45,21 @@ static void CopyByte(InflateVars& vars)
 
 static void ProcessDict(InflateVars& vars)
 {
+	// A dict is 2 bytes containing an offset and a count. The offset is the position to start 
+	// copying from the ring buffer. The count is the number of bytes to copy. As with simple
+	// byte copies, the bytes must also be written to the ring buffer.
+
+	// The offset is an unsigned 12 bit integer with the first byte (c0) as the lower 8 bits and
+	// the upper 4 bits of the second byte (c1) as the upper 4 bits.
+
+	// The count is an unsigned 4 bit integer made from the lower 4 bits of the second byte (c1).
+	// The shortest useful dict count would be 3 so the range of count is 3-18 instead of 0-15.
+
+	// c0:             zzzzzzzz
+	// c1:             xxxxyyyy
+	// offset:     xxxxzzzzzzzz
+	// count:              yyyy
+
 	unsigned int c0 = (unsigned char)Unpack::in_buffer[vars.in_buffer_pos];
 	unsigned int c1 = (unsigned char)Unpack::in_buffer[vars.in_buffer_pos + 1];
 	vars.in_buffer_pos += 2;
@@ -67,6 +85,10 @@ bool Unpack::InflateFile(std::ifstream& in_stream, std::ofstream& out_stream, co
 		std::fprintf(stderr, "ERROR: Inflate read error\n");
 		return true;
 	}
+
+	// The bits in a type byte indicate what the next 8 operations are going be. 1 means just
+	// copy a byte from input to output and ring buffer. 0 means read a 2 byte dict and copy 3-18
+	// bytes from the ring buffer to the output and ring buffer.
 
 	unsigned char type_byte;
 	InflateVars vars;
