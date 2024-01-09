@@ -6,7 +6,7 @@ Useful utilities for THUG 2/THUG Pro.
 
 ## Tools
 
-### ug2-pre-unpack
+### ug2-unpack
 <details>
 <br>
 <summary>Extract files embedded in pre/prx files.</summary>
@@ -14,11 +14,11 @@ Useful utilities for THUG 2/THUG Pro.
 ```
 Usage:
 
-    ug2-pre-unpack [FILE] [OPTION]...
+    ug2-unpack [FILE] [OPTION]...
     
 Example:
 
-    ug2-pre-unpack infile.prx -wo data/pre
+    ug2-unpack infile.prx -wo data/pre
 
     Lists the contents of "infile.prx" and extracts them to ./data/pre, overwriting any existing
     versions of the files.
@@ -32,6 +32,7 @@ Options:
     -p              Disable prespec file generation.
     -P              Disable absolute paths in prespec file.
     -n              Don't extract files or generate prespec.
+    -V              Print version information.
 ```
 </details>
 
@@ -129,7 +130,7 @@ Options:
 ## Status
 Tool|Status
 ---|---
-ug2-pre-unpack|Ready
+ug2-pre-unpack|v1.1.0
 ug2-pre-pack|Ready
 ug2-tex2dds|Ready
 ug2-dds2tex|Ready
