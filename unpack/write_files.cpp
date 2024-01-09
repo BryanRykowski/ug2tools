@@ -19,50 +19,29 @@
 // SOFTWARE.
 
 #include "unpack.hpp"
-#include <cstddef>
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <vector>
 
-constexpr size_t buffer_size = 1024 * 1024;
-static char read_buffer[buffer_size];
-
 static bool CopyFile(std::ifstream& in_stream, std::ofstream& out_stream, const Unpack::EmbeddedFile& file)
 {
 	in_stream.seekg(file.offset);
-	size_t remain_count = file.raw_size;
+	in_stream.read(&Unpack::out_buffer[0], file.raw_size);
 
-	while (remain_count > 0)
+	if (in_stream.fail())
 	{
-		std::printf("size: %zu\n", remain_count);
+		std::fprintf(stderr, "ERROR: Copy error (read)\n");
+		return true;
+	}
 
-		if (remain_count > buffer_size)
-		{
-			in_stream.read(read_buffer, buffer_size);
-		}
-		else
-		{
-			in_stream.read(read_buffer, remain_count);
-		}
+	out_stream.write(&Unpack::out_buffer[0], file.raw_size);
 
-		std::printf("read count: %u\n", (unsigned int)in_stream.gcount());
-
-		if (in_stream.fail())
-		{
-			std::fprintf(stderr, "ERROR: Failed copy embedded file (read)\n");
-			return true;
-		}
-
-		remain_count -= in_stream.gcount();
-		out_stream.write(read_buffer, in_stream.gcount());
-
-		if (out_stream.fail())
-		{
-			std::fprintf(stderr, "ERROR: Failed copy embedded file (write)\n");
-			return true;
-		}
+	if (out_stream.fail())
+	{
+		std::fprintf(stderr, "ERROR: Copy error (write)\n");
+		return true;
 	}
 
 	return false;
@@ -96,6 +75,18 @@ static bool PathGetFileName(const std::vector<char>& path, std::string& file_nam
 
 bool Unpack::WriteFiles(const Unpack::Config& config, Unpack::PreFile& pre)
 {
+	unsigned int largest_lzss = 0;
+	unsigned int largest_raw = 0;
+
+	for (const EmbeddedFile& file : pre.files)
+	{
+		if (file.lzss_size > largest_lzss) {largest_lzss = file.lzss_size;}
+		if (file.raw_size > largest_raw) {largest_raw = file.raw_size;}
+	}
+
+	in_buffer.resize(largest_lzss);
+	out_buffer.resize(largest_raw);
+
 	for (const EmbeddedFile& file : pre.files)
 	{
 		std::string file_name;
@@ -113,11 +104,11 @@ bool Unpack::WriteFiles(const Unpack::Config& config, Unpack::PreFile& pre)
 
 		if (file.lzss_size == 0)
 		{
-			CopyFile(pre.in_stream, out_stream, file);
+			if (CopyFile(pre.in_stream, out_stream, file)) { return true;}
 		}
 		else
 		{
-			InflateFile(pre.in_stream, out_stream, file);
+			if (InflateFile(pre.in_stream, out_stream, file)) { return true;}
 		}  
 	}
 

@@ -19,10 +19,9 @@
 // SOFTWARE.
 
 #include "unpack.hpp"
+#include <cstdio>
 #include <vector>
 
-static std::vector<char> in_buffer;
-static std::vector<char> out_buffer;
 static char ring_buffer[4096];
 
 struct InflateVars
@@ -34,8 +33,8 @@ struct InflateVars
 
 static void CopyByte(InflateVars& vars)
 {
-	ring_buffer[vars.ring_buffer_pos] = in_buffer[vars.in_buffer_pos];
-	out_buffer[vars.out_buffer_pos] = in_buffer[vars.in_buffer_pos];
+	ring_buffer[vars.ring_buffer_pos] = Unpack::in_buffer[vars.in_buffer_pos];
+	Unpack::out_buffer[vars.out_buffer_pos] = Unpack::in_buffer[vars.in_buffer_pos];
 	++vars.in_buffer_pos;
 	++vars.out_buffer_pos;
 	vars.ring_buffer_pos = (vars.ring_buffer_pos + 1) % 4096;
@@ -43,8 +42,8 @@ static void CopyByte(InflateVars& vars)
 
 static void ProcessDict(InflateVars& vars)
 {
-	unsigned int c0 = (unsigned char)in_buffer[vars.in_buffer_pos];
-	unsigned int c1 = (unsigned char)in_buffer[vars.in_buffer_pos + 1];
+	unsigned int c0 = (unsigned char)Unpack::in_buffer[vars.in_buffer_pos];
+	unsigned int c1 = (unsigned char)Unpack::in_buffer[vars.in_buffer_pos + 1];
 	vars.in_buffer_pos += 2;
 	unsigned int offset = c0 | ((c1 & 0xf0) << 4);
 	unsigned int count = (c1 & 0xf) + 3;
@@ -52,7 +51,7 @@ static void ProcessDict(InflateVars& vars)
 	for (unsigned int i = 0; i < count; ++i)
 	{
 		ring_buffer[vars.ring_buffer_pos] = ring_buffer[(offset + i) % 4096];
-		out_buffer[vars.out_buffer_pos] = ring_buffer[(offset + i) % 4096];
+		Unpack::out_buffer[vars.out_buffer_pos] = ring_buffer[(offset + i) % 4096];
 		++vars.out_buffer_pos;
 		vars.ring_buffer_pos = (vars.ring_buffer_pos + 1) % 4096;
 	}
@@ -60,10 +59,8 @@ static void ProcessDict(InflateVars& vars)
 
 bool Unpack::InflateFile(std::ifstream& in_stream, std::ofstream& out_stream, const Unpack::EmbeddedFile& file)
 {
-	in_buffer.resize(file.lzss_size);
-	out_buffer.resize(file.raw_size);
 	in_stream.seekg(file.offset);
-	in_stream.read(&in_buffer[0], file.lzss_size);
+	in_stream.read(&Unpack::in_buffer[0], file.lzss_size);
 
 	if (in_stream.fail())
 	{
@@ -78,8 +75,9 @@ bool Unpack::InflateFile(std::ifstream& in_stream, std::ofstream& out_stream, co
 	{
 		type_byte = in_buffer[vars.in_buffer_pos];
 		++vars.in_buffer_pos;
+		int count = std::min((int)(file.lzss_size - vars.in_buffer_pos) - 1, 8);
 
-		for (int i = 0; i < 8; ++i)
+		for (int i = 0; i < count; ++i)
 		{
 			if ((type_byte >> i) & 0x1)
 			{
@@ -92,7 +90,7 @@ bool Unpack::InflateFile(std::ifstream& in_stream, std::ofstream& out_stream, co
 		}
 	}
 
-	out_stream.write(&out_buffer[0], file.raw_size);
+	out_stream.write(&Unpack::out_buffer[0], file.raw_size);
 
 	if (out_stream.fail())
 	{
