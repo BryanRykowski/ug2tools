@@ -20,13 +20,12 @@
 
 #include "unpack.hpp"
 #include "../libug2/read_word.hpp"
-#include "../common/pre_header.hpp"
-#include "../common/subfile_header.hpp"
+#include <cstdint>
 #include <cstdio>
 #include <vector>
 #include <fstream>
 
-static bool ReadHeader(std::ifstream& in_stream, PreHeader& header)
+static bool ReadHeader(std::ifstream& in_stream, uint32_t& size, uint32_t& num_files)
 {
 	char buffer[12];
 	in_stream.read(buffer, 12);
@@ -37,10 +36,8 @@ static bool ReadHeader(std::ifstream& in_stream, PreHeader& header)
 		return true;
 	}
 
-	header.size = read_u32le(&buffer[0]);
-	header.version = read_u16le(&buffer[4]);
-	header.unknown = read_u16le(&buffer[6]);
-	header.numFiles = read_u32le(&buffer[8]);
+	size = read_u32le(&buffer[0]);
+	num_files = read_u32le(&buffer[8]);
 
 	return false;
 }
@@ -93,14 +90,11 @@ bool Unpack::ReadPre(const std::filesystem::path in_file, Unpack::PreFile& pre)
 		std::fprintf(stderr, "ERROR: Failed to open file \"%s\"\n", in_file.string().c_str());
 		return true;
 	}
-	
 
-	PreHeader header;
-	if (ReadHeader(pre.in_stream, header)) {return true;}
-	pre.size = header.size;
+	uint32_t num_files;
+	if (ReadHeader(pre.in_stream, pre.size, num_files)) {return true;}
 
-	SubFileHeader subheader;
-	for (unsigned int i = 0; i < header.numFiles; ++i)
+	for (unsigned int i = 0; i < num_files; ++i)
 	{
 		EmbeddedFile embedded_file;
 		if (ReadSubFile(pre.in_stream, embedded_file)) {return true;}
