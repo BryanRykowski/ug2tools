@@ -140,4 +140,4 @@ ug2-obj2mdl|
 ug2-col2obj|
 ug2-obj2col|
 ---
-**Copyright (c) 2023 Bryan Rykowski**
+**Copyright (c) 2023-2024 Bryan Rykowski**
