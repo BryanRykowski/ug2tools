@@ -1,3 +1,9 @@
+* [release date] Bryan Rykowski <90996715+BryanRykowski@users.noreply.github.com> - 0.3.0-1
+- ug2-unpack 1.1.0
+- ug2-pre-unpack is renamed to ug2-unpack
+- ug2-unpack is re-written and versioned now
+- ug2-unpack now has -V flag to print version
+
 * Sun Oct 22 2023 Bryan Rykowski <90996715+BryanRykowski@users.noreply.github.com> - 0.2.0-1
 - Application: ug2-tex2dds
 - Application: ug2-dds2tex
