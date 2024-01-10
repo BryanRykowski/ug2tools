@@ -113,7 +113,7 @@ void Unpack::PrintVersion()
 #endif
 
 	constexpr const char* ug2_version = UG2TOOLS_VERSION;
-	std::printf("ug2-tools %s\nunpack %s\n", ug2_version, Unpack::app_version);
+	std::printf("ug2tools %s\nunpack %s\n", ug2_version, Unpack::app_version);
 }
 
 static void ListInfo(const Unpack::PreFile& pre)
@@ -139,10 +139,15 @@ bool Unpack::Unpack(const Unpack::Config& config)
 	{
 		if (config.print_version) {PrintVersion();}
 		PrintHelp();
-		return false;
+		if (config.in_file.empty()) {return false;}
 	}
 
-	if (config.print_version) {PrintVersion();}
+	if (config.print_version)
+	{
+		PrintVersion();
+		if (config.print_help) {PrintHelp();}
+		if (config.in_file.empty()) {return false;}
+	}
 	
 	if (config.in_file.empty())
 	{
