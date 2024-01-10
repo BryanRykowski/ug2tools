@@ -91,6 +91,8 @@ bool Unpack::ReadPre(const std::filesystem::path in_file, Unpack::PreFile& pre)
 		return true;
 	}
 
+	pre.in_path = in_file;
+
 	uint32_t num_files;
 	if (ReadHeader(pre.in_stream, pre.size, num_files)) {return true;}
 

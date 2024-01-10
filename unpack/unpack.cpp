@@ -128,13 +128,6 @@ static void ListInfo(const Unpack::PreFile& pre)
 	}
 }
 
-static bool WriteSpec(const Unpack::Config& config, const Unpack::PreFile& pre)
-{
-	(void)config;
-	(void)pre;
-	return false;
-}
-
 bool Unpack::Unpack(const Unpack::Config& config)
 {
 	if (!config.quiet)

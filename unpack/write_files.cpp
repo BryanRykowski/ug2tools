@@ -20,7 +20,6 @@
 
 #include "unpack.hpp"
 #include <cstdio>
-#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <vector>
@@ -43,32 +42,6 @@ static bool CopyFile(std::ifstream& in_stream, std::ofstream& out_stream, const 
 		std::fprintf(stderr, "ERROR: Copy error (write)\n");
 		return true;
 	}
-
-	return false;
-}
-
-static bool PathGetFileName(const std::vector<char>& path, std::string& file_name)
-{
-	if (path.size() < 1)
-	{
-		std::fprintf(stderr, "ERROR: Malformed path in embedded file\n");
-		return true;
-	}
-
-	int i = path.size() - 1;
-	int start = i;
-	int end = path.size();
-
-	while (i >= 0)
-	{
-		if (path[i] == '\0') {end = i;}
-		if (path[i] == '\\') {break;}
-		start = i;
-		--i;
-	}
-
-	file_name.resize(end - start);
-	std::memcpy(&file_name[0], &path[start], file_name.size());
 
 	return false;
 }
