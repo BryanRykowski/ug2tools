@@ -122,8 +122,8 @@ static void ListInfo(const Unpack::PreFile& pre)
 
 	for (const Unpack::EmbeddedFile& file : pre.files)
 	{
-    path.resize(file.path.size());
-    std::memcpy(&path[0], &file.path[0], file.path.size());
+		path.resize(file.path.size());
+    	std::memcpy(&path[0], &file.path[0], file.path.size());
 		std::printf("%-10u %-10u %s\n", file.lzss_size, file.raw_size, path.c_str());
 	}
 }
