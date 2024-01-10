@@ -55,6 +55,7 @@ namespace Unpack
 	struct PreFile
 	{
 		std::ifstream in_stream;
+		std::filesystem::path in_path;
 		std::vector<Unpack::EmbeddedFile> files;
 		uint32_t size;
 	};
@@ -63,7 +64,9 @@ namespace Unpack
 	void PrintHelp();
 	void PrintVersion();
 	bool Unpack(const Unpack::Config& config);
+	bool PathGetFileName(const std::vector<char>& path, std::string& file_name);
 	bool ReadPre(const std::filesystem::path in_file, Unpack::PreFile& pre);
+	bool WriteSpec(const Unpack::Config& config, const Unpack::PreFile& pre);
 	bool WriteFiles(const Unpack::Config& config, Unpack::PreFile& pre);
 	bool InflateFile(std::ifstream& in_stream, std::ofstream& out_stream, const Unpack::EmbeddedFile& file);
 }
