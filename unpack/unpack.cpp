@@ -167,8 +167,15 @@ bool Unpack::Unpack(const Unpack::Config& config)
 		ListInfo(pre);
 	}
 
-	if (WriteSpec(config, pre)) {return true;}
-	if (Unpack::WriteFiles(config, pre)) {return true;}
+	if (config.write_spec)
+	{
+		if (WriteSpec(config, pre)) {return true;}
+	}
+
+	if (config.write)
+	{
+		if (Unpack::WriteFiles(config, pre)) {return true;}
+	}
 
 	return false;
 }
