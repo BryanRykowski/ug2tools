@@ -23,10 +23,10 @@
 #include <string>
 
 constexpr const char* help_str =
-	"Usage: ug2-pre-unpack [FILE] [OPTION]...\n\n"
+	"Usage: ug2-unpack [FILE] [OPTION]...\n\n"
 	"Extract files embedded in pre/prx files.\n\n"
 	"Example:\n\n"
-	"        ug2-pre-unpack infile.prx -wo data/pre\n\n"
+	"        ug2-unpack infile.prx -wo data/pre\n\n"
 	"        Lists the contents of \"infile.prx\" and extracts them to\n\n"
 	"        ./data/pre, overwriting any existing versions of the files.\n\n"
 	"Options:\n"
@@ -132,7 +132,7 @@ bool Unpack::Unpack(const Unpack::Config& config)
 {
 	if (!config.quiet)
 	{
-		std::printf("unpack | Bryan Rykowski 2023\n");
+		std::printf("ug2tools unpack | Bryan Rykowski 2023-2024\n");
 	}
 
 	if (config.print_help)
