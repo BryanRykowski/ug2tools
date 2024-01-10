@@ -8,6 +8,7 @@ add_executable (ug2-unpack
 	inflate_file.cpp
 	write_spec.cpp
 	path_get_file_name.cpp
+	path_to_string.cpp
 	../libug2/read_word.hpp
 )
 set_property (TARGET ug2-unpack PROPERTY CXX_STANDARD 17)

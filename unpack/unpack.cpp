@@ -20,7 +20,6 @@
 
 #include "unpack.hpp"
 #include <cstdio>
-#include <cstring>
 #include <string>
 
 constexpr const char* help_str =
@@ -118,13 +117,9 @@ static void ListInfo(const Unpack::PreFile& pre)
 	std::printf("size: %u\n", pre.size);
 	std::printf("lszz       raw        path\n");
 
-  std::string path;
-
 	for (const Unpack::EmbeddedFile& file : pre.files)
 	{
-		path.resize(file.path.size());
-    	std::memcpy(&path[0], &file.path[0], file.path.size());
-		std::printf("%-10u %-10u %s\n", file.lzss_size, file.raw_size, path.c_str());
+		std::printf("%-10u %-10u %s\n", file.lzss_size, file.raw_size, Unpack::PathToString(file.path).c_str());
 	}
 }
 
