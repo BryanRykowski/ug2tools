@@ -27,6 +27,15 @@
 
 static bool ReadHeader(std::ifstream& in_stream, uint32_t& size, uint32_t& num_files)
 {
+	// pre file header layout:
+
+	// size format description
+
+	// 4    u32    total file size
+	// 2    u16    version?
+	// 2    ?      unknown
+	// 4    u32    number of embedded files
+
 	char buffer[12];
 	in_stream.read(buffer, 12);
 
@@ -44,6 +53,16 @@ static bool ReadHeader(std::ifstream& in_stream, uint32_t& size, uint32_t& num_f
 
 static bool ReadSubFile(std::ifstream& in_stream, Unpack::EmbeddedFile& embedded_file)
 {
+	// embedded file header layout:
+
+	// size format description
+
+	// 4    u32    uncompressed file size
+	// 4    u32    compressed file size
+	// 4    u32    path string length
+	// 4    u32    path crc
+	// x    char[] path string (length is always multiple of 4)
+
 	char buffer[16];
 	in_stream.read(buffer, 16);
 
