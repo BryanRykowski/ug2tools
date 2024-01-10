@@ -14,6 +14,7 @@ if (MSVC)
 	add_compile_options (-Wall -Wextra)
 endif ()
 
+add_compile_definitions(UG2TOOLS_VERSION="${PROJECT_VERSION}")
 add_subdirectory(libug2)
 
 if (UG2TOOLS_BUILD_UNPACK)
