@@ -64,6 +64,7 @@ namespace Unpack
 	void PrintHelp();
 	void PrintVersion();
 	bool Unpack(const Unpack::Config& config);
+	std::string PathToString(const std::vector<char>& path);
 	bool PathGetFileName(const std::vector<char>& path, std::string& file_name);
 	bool ReadPre(const std::filesystem::path in_file, Unpack::PreFile& pre);
 	bool WriteSpec(const Unpack::Config& config, const Unpack::PreFile& pre);

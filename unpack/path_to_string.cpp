@@ -19,49 +19,21 @@
 // SOFTWARE.
 
 #include "unpack.hpp"
-#include <cstdio>
-#include <filesystem>
-#include <fstream>
+#include <vector>
+#include <cstring>
 
-bool Unpack::WriteSpec(const Unpack::Config& config, const Unpack::PreFile& pre)
+std::string Unpack::PathToString(const std::vector<char>& path)
 {
-	std::filesystem::path spec_path = config.out_dir;
-	std::filesystem::path filename = pre.in_path.filename();
-	spec_path /= filename;
-	spec_path.replace_extension("prespec");
+	std::string s;
+	size_t size = 0;
 
-	if (std::filesystem::exists(spec_path) && !config.overwrite)
+	for (size_t i = 0; i < path.size(); ++i)
 	{
-		std::fprintf(stderr, "ERROR: File \"%s\" already exists [Hint: pass -w (overwrite) flag]\n", spec_path.c_str());
-		return true;
+		size = i;
+		if (path[i] == '\0') {break;}
 	}
 
-	std::ofstream out_stream(spec_path);
-
-	if (out_stream.fail())
-	{
-		std::fprintf(stderr, "ERROR: Failed to create file \"%s\"\n", spec_path.c_str());
-		return true;
-	}
-
-	std::filesystem::path working_dir = std::filesystem::current_path();
-
-	for (const EmbeddedFile& file : pre.files)
-	{
-		std::filesystem::path path;
-
-		if (config.spec_absolute)
-		{
-			path = working_dir;
-			path /= config.out_dir;
-		}
-
-		std::string filename;
-		if (PathGetFileName(file.path, filename)) {return true;}
-		path /= filename; 
-
-		out_stream << path.string() << "\n" << PathToString(file.path) << "\n" << "\n";
-	}
-	return false;
+	s.resize(size);
+	std::memcpy(&s[0], &path[0], size);
+	return s;
 }
-
