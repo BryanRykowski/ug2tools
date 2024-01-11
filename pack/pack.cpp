@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <cstdio>
 #include <fstream>
 #include "../common/pre_header.hpp"
 #include "../common/subfile_header.hpp"
@@ -44,10 +45,12 @@ struct
     bool overwrite = false;
     bool pack = true;
     bool quiet = false;
+	bool printversion = false;
     bool printhelp = false;
 } globalValues;
 
 void PrintHelp();
+void PrintVersion();
 bool ReadArgs(int argc, char **argv);
 bool ReadPrespec();
 bool ReadLine(std::ifstream &instream, std::string &outstr);
@@ -71,10 +74,11 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    if (globalValues.printhelp)
+    if (globalValues.printhelp || globalValues.printversion)
     {
-        PrintHelp();
-        return 0;
+		if (globalValues.printversion) PrintVersion();
+		if (globalValues.printhelp) PrintHelp();
+		if (globalValues.prespecpath.empty()) return 0;
     }
 
     if (!globalValues.prespecpath.empty())
@@ -123,6 +127,20 @@ void PrintHelp()
     std::cout << "    -q                          Suppress some output. Does not include errors" << std::endl;
     std::cout << "    -w                          Overwrite existing file" << std::endl;
     std::cout << "    -n                          Don't create pre file, just list files" << std::endl;
+    std::cout << "    -V                          Print version info" << std::endl;
+}
+
+void PrintVersion()
+{
+#ifndef UG2TOOLS_VERSION
+#define UG2TOOLS_VERSION "unknown"
+#endif
+
+#ifndef APP_VERSION
+#define APP_VERSION "unknown"
+#endif
+
+	std::printf("ug2tools %s\npack %s\n", UG2TOOLS_VERSION, APP_VERSION);
 }
 
 bool ReadArgs(int argc, char **argv)
@@ -193,6 +211,10 @@ bool ReadArgs(int argc, char **argv)
                 else if (c == 'h')
                 {
                     globalValues.printhelp = true;
+                }
+                else if (c == 'V')
+                {
+                    globalValues.printversion = true;
                 }
             }
         }

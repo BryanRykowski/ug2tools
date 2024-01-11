@@ -67,6 +67,7 @@ Options:
     -q                          Suppress some output. Does not include errors
     -w                          Overwrite existing file
     -n                          Don't create pre file, just list files
+    -V                          Print version info
 ```
 
 **Note: ug2-pack does not compress input files.**

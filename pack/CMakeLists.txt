@@ -1,3 +1,4 @@
+add_compile_definitions(APP_VERSION="1.1.0")
 add_executable (ug2-pack pack.cpp ../common/pre_header.hpp ../common/subfile_header.hpp ../libug2/crc.hpp ../libug2/write_word.hpp)
 set_property (TARGET ug2-pack PROPERTY CXX_STANDARD 17)
 target_link_libraries(ug2-pack libug2)
