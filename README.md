@@ -36,7 +36,7 @@ Options:
 ```
 </details>
 
-### ug2-pre-pack
+### ug2-pack
 <details>
 <br>
 <summary>Embed game resources in pre/prx file.</summary>
@@ -44,15 +44,15 @@ Options:
 ```
 Usage: 
     
-    ug2-pre-pack [FILE] [OPTION]...
+    ug2-pack [FILE] [OPTION]...
 
 Examples:
     
-    ug2-pre-pack in.prespec -o out.pre
+    ug2-pack in.prespec -o out.pre
 
     Create out.pre and insert the files listed in in.prespec.
 
-    ug2-pre-pack -o somewhere/name.pre \
+    ug2-pack -o somewhere/name.pre \
     -f file1.qb internal\\path\\file1.qb \
     -f file2.col.xbx other\\internal\\path\\file2.col.xbx
 
@@ -69,7 +69,7 @@ Options:
     -n                          Don't create pre file, just list files
 ```
 
-**Note: ug2-pre-pack does not compress input files.**
+**Note: ug2-pack does not compress input files.**
 
 </details>
 

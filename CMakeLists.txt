@@ -4,7 +4,7 @@ set (UG2TOOLS_PACKAGE_RELEASE_NUM 1)
 
 option (UG2TOOLS_PACKAGE_RPM "Generate a x86_64 rpm using cpack." OFF)
 option (UG2TOOLS_BUILD_UNPACK "Build the unpack executable." ON)
-option (UG2TOOLS_BUILD_PRE_PACK "Build the pre-pack executable." ON)
+option (UG2TOOLS_BUILD_PACK "Build the pack executable." ON)
 option (UG2TOOLS_BUILD_TEX2DDS "Build the tex2dds executable." ON)
 option (UG2TOOLS_BUILD_DDS2TEX "Build the dds2tex executable." ON)
 
@@ -21,8 +21,8 @@ if (UG2TOOLS_BUILD_UNPACK)
 	add_subdirectory (unpack)
 endif ()
 
-if (UG2TOOLS_BUILD_PRE_PACK)
-	add_subdirectory (pre-pack)
+if (UG2TOOLS_BUILD_PACK)
+	add_subdirectory (pack)
 endif ()
 
 if (UG2TOOLS_BUILD_TEX2DDS)

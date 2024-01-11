@@ -109,12 +109,12 @@ int main(int argc, char **argv)
 
 void PrintHelp()
 {
-    std::cout << "Usage: ug2-pre-pack [FILE] [OPTION]..." << std::endl << std::endl;
+    std::cout << "Usage: ug2-pack [FILE] [OPTION]..." << std::endl << std::endl;
     std::cout << "Embed game resources in pre/prx file." << std::endl << std::endl;
     std::cout << "Examples:" << std::endl << std::endl;
-    std::cout << "        ug2-pre-pack in.prespec -o out.pre" << std::endl << std::endl;
+    std::cout << "        ug2-pack in.prespec -o out.pre" << std::endl << std::endl;
     std::cout << "        Create out.pre and insert the files listed in in.prespec." << std::endl << std::endl << std::endl;
-    std::cout << "        ug2-pre-pack -o somewhere/name.pre -f file1.qb internal\\\\path\\\\file1.qb -f file2.col.xbx other\\\\internal\\\\path\\\\file2.col.xbx" << std::endl << std::endl;
+    std::cout << "        ug2-pack -o somewhere/name.pre -f file1.qb internal\\\\path\\\\file1.qb -f file2.col.xbx other\\\\internal\\\\path\\\\file2.col.xbx" << std::endl << std::endl;
     std::cout << "        Manually specify files and their internal paths using the -f switch and write pre file in specific location." << std::endl << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << "    -h                          Print this help text" << std::endl;
