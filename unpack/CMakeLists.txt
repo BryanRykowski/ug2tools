@@ -1,3 +1,4 @@
+add_compile_definitions(APP_VERSION="1.1.0")
 add_executable (ug2-unpack
 	unpack.hpp
 	main.cpp

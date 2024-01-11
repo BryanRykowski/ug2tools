@@ -26,7 +26,6 @@
 
 namespace Unpack
 {
-	constexpr const char* app_version = "1.1.0";
 	extern std::vector<char> in_buffer;
 	extern std::vector<char> out_buffer;
 
