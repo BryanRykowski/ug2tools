@@ -112,8 +112,11 @@ void Unpack::PrintVersion()
 #define UG2TOOLS_VERSION "unknown"
 #endif
 
-	constexpr const char* ug2_version = UG2TOOLS_VERSION;
-	std::printf("ug2tools %s\nunpack %s\n", ug2_version, Unpack::app_version);
+#ifndef APP_VERSION
+#define APP_VERSION "unknown"
+#endif
+
+	std::printf("ug2tools %s\nunpack %s\n", UG2TOOLS_VERSION, APP_VERSION);
 }
 
 static void ListInfo(const Unpack::PreFile& pre)
